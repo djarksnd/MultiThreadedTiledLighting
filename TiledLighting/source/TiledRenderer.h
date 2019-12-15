@@ -27,8 +27,8 @@ class CBaseCamera;
 class TiledRenderer
 {
 public:
-	static constexpr unsigned int NumMaxPointLights = 2048;
-	static constexpr unsigned int NumMaxSpotLights = 2048;
+	static constexpr size_t NumMaxPointLights = 2048;
+	static constexpr size_t NumMaxSpotLights = 2048;
 
 	struct StenCilMask
 	{
@@ -113,9 +113,24 @@ public:
 	bool GetVisualizeNumLights() const {
 		return visualizeNumLights;
 	}
+    void SetEnableMultiThreadedRendering(bool enable) {
+        enableMultiThreadedRendering = enable;
+    }
 	bool GetEnableMultiThreadedRendering() const {
 		return enableMultiThreadedRendering;
 	}
+    void SetNumPointLightLimit(size_t num) {
+        numPointLightLimit = num;
+    }
+    size_t GetNumPointLightLimit() const {
+        return numPointLightLimit;
+    }
+    void SetNumSpotLightLimit(size_t num) {
+        numSpotLightLimit = num;
+    }
+    size_t GetNumSpotLightLimit() const {
+        return numSpotLightLimit;
+    }
 	const RenderTarget& GetSceneRenderTarget() const {
 		return sceneRenderTarget;
 	}
@@ -134,12 +149,12 @@ public:
 	const std::vector<std::shared_ptr<Object>>& GetMaskedObjects() const {
 		return maskedObjects;
 	}
-	const std::vector<PointLight>& GetPointLights() const {
-		return pointLights;
-	}
-	const std::vector<SpotLight>& GetSpotLights() const {
-		return spotLights;
-	}
+    const PointLight& GetPointLight(size_t index) const {
+        return pointLights[index];
+    }
+    const SpotLight& GetSpotLight(size_t index) const {
+        return spotLights[index];
+    }
 	const ViewInfo& GetViewInfo() const {
 		return viewInfo;
 	}
@@ -149,6 +164,12 @@ public:
 	const DirectX::XMFLOAT3& GetSceneBoundMax() const {
 		return sceneBoundMax;
 	}
+    void SetNumPointLightShadowLimit(size_t num) {
+        shadowDepthBuffer.SetNumPointLightShadowLimit(num);
+    }
+    void SetNumSpotLightShadowLimit(size_t num) {
+        shadowDepthBuffer.SetNumSpotLightShadowLimit(num);
+    }
 
 private:
 	void InitObjects();
@@ -183,6 +204,8 @@ private:
 	std::vector<std::shared_ptr<Object>> maskedObjects;
 	std::vector<PointLight> pointLights;
 	std::vector<SpotLight> spotLights;
+    size_t numPointLightLimit = NumMaxPointLights / 2;
+    size_t numSpotLightLimit = NumMaxSpotLights / 2;
 	ViewInfo viewInfo;
 
 	mutable std::vector<RenderingTask> renderingTasks;

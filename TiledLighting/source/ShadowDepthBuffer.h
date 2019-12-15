@@ -14,16 +14,16 @@ class TiledRenderer;
 class ShadowDepthBuffer
 {
 public:
-	constexpr static unsigned int NumMaxPointLightShadows = 2;
-	constexpr static unsigned int NumMaxSpotLightShadows = 8;
+	constexpr static size_t NumMaxPointLightShadows = 2;
+	constexpr static size_t NumMaxSpotLightShadows = 8;
 
 public:
-	ShadowDepthBuffer();
+    ShadowDepthBuffer() {}
 
 	bool Create(const TiledRenderer& renderer, unsigned int bufferResolution);
 	void Render(const TiledRenderer& renderer);
-	void SetNumPointLightShadows(unsigned int numLights);
-	void SetNumSpotLightShadows(unsigned int numLights);
+	void SetNumPointLightShadowLimit(size_t num);
+	void SetNumSpotLightShadowLimit(size_t num);
 
 	const DepthStencilBuffer& GetPointLightShadowDepthBuffer() const {
 		return pointLightShadowDepthBuffer;
@@ -31,11 +31,17 @@ public:
 	const DepthStencilBuffer& GetSpotLightShadowDepthBuffer() const {
 		return spotLightShadowDepthBuffer;
 	}
-	unsigned int GetNumPointLightShadows() const {
-		return numPointLightShadows;
+    size_t GetNumPointLightShadowLimit() const {
+        return numPointLightShadowLimit;
+    }
+    size_t GetNumSpotLightShadowLimit() const {
+        return numSpotLightShadowLimit;
+    }
+    size_t GetNumCurrFramePointLightShadows() const {
+		return numCurrFramePointLightShadows;
 	}
-	unsigned int GetNumSpotLightShadows() const {
-		return numSpotLightShadows;
+    size_t GetNumCurrFrameSpotLightShadows() const {
+		return numCurrFrameSpotLightShadows;
 	}
 
 private:
@@ -57,7 +63,9 @@ private:
 	RasterizerState rasterizerState;
 	SamplerState samplerState;
 
-	unsigned int bufferResolution;
-	unsigned int numPointLightShadows;
-	unsigned int numSpotLightShadows;
+    unsigned int bufferResolution = 0;
+    size_t numPointLightShadowLimit = NumMaxPointLightShadows;
+    size_t numSpotLightShadowLimit = NumMaxSpotLightShadows;
+    size_t numCurrFramePointLightShadows = 0;
+    size_t numCurrFrameSpotLightShadows = 0;
 };

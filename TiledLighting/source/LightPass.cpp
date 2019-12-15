@@ -173,17 +173,19 @@ void LightPass::CullLights(const TiledRenderer& renderer)
 
 	const Frustum frustum(renderer.GetViewInfo().invViewProjectionMatrix);
 
-	for (auto& light : renderer.GetPointLights())
+	for (size_t index = 0; index < renderer.GetNumPointLightLimit(); ++index)
 	{
+        const PointLight& light = renderer.GetPointLight(index);
 		if (frustum.Test(DirectX::XMLoadFloat3(&light.position), light.radius))
 			pointLights.push_back(light);
 	}
 
-	for (auto& light : renderer.GetSpotLights())
-	{
-		if (frustum.Test(DirectX::XMLoadFloat3(&light.position), light.radius))
-			spotLights.push_back(light);
-	}
+    for (size_t index = 0; index < renderer.GetNumSpotLightLimit(); ++index)
+    {
+        const SpotLight& light = renderer.GetSpotLight(index);
+        if (frustum.Test(DirectX::XMLoadFloat3(&light.position), light.radius))
+            spotLights.push_back(light);
+    }
 
 	ID3D11DeviceContext* deviceContext = renderer.GetDeviceContext();
 
@@ -273,8 +275,8 @@ void LightPass::RenderLights(const TiledRenderer& renderer)
 	psCBufferData.numThreadsPerTileY = NumThreadsPerTileY;
 	psCBufferData.numTilesX = GetNumTileX(renderer.GetScreenWidth());
 
-	psCBufferData.numPointLightShadows = renderer.GetShadowDepthBuffer().GetNumPointLightShadows();
-	for (unsigned int shadowIndex = 0; shadowIndex < renderer.GetShadowDepthBuffer().GetNumPointLightShadows(); ++shadowIndex)
+	psCBufferData.numPointLightShadows = renderer.GetShadowDepthBuffer().GetNumCurrFramePointLightShadows();
+	for (unsigned int shadowIndex = 0; shadowIndex < renderer.GetShadowDepthBuffer().GetNumCurrFramePointLightShadows(); ++shadowIndex)
 	{
 		for (unsigned int face = 0; face < 6; ++face)
 		{
@@ -286,8 +288,8 @@ void LightPass::RenderLights(const TiledRenderer& renderer)
 		}
 	}
 
-	psCBufferData.numSpotLightShadows = renderer.GetShadowDepthBuffer().GetNumSpotLightShadows();
-	for (unsigned int shadowIndex = 0; shadowIndex < renderer.GetShadowDepthBuffer().GetNumSpotLightShadows(); ++shadowIndex)
+	psCBufferData.numSpotLightShadows = renderer.GetShadowDepthBuffer().GetNumCurrFrameSpotLightShadows();
+	for (unsigned int shadowIndex = 0; shadowIndex < renderer.GetShadowDepthBuffer().GetNumCurrFrameSpotLightShadows(); ++shadowIndex)
 	{
 		psCBufferData.spotLightShadowMatrices[shadowIndex] = ComputeSpotLightShadowMatrix(spotLights[shadowIndex]);
 		psCBufferData.spotLightShadowMatrices[shadowIndex] = DirectX::XMMatrixTranspose(psCBufferData.spotLightShadowMatrices[shadowIndex]);
@@ -301,8 +303,12 @@ void LightPass::RenderLights(const TiledRenderer& renderer)
 
 	if (renderer.GetVisualizeNumLights())
 	{
+        deviceContext->PSSetShader(deferredLightingPixelShader, nullptr, 0);
+        deviceContext->OMSetRenderTargets(1, &rtv, renderer.GetSceneDepthStencilBuffer().GetReadOnlyDepthStencilView());
+        deviceContext->OMSetBlendState(deferredLightingBlendState, nullptr, 0xffffffff);
+        deviceContext->OMSetDepthStencilState(deferredLightingDepthStencilState, TiledRenderer::StenCilMask::DeferredLightable);
 		deviceContext->PSSetShader(visualizeNumLightsPixelShader, nullptr, 0);
-		deviceContext->OMSetRenderTargets(1, &rtv, nullptr);
+		//deviceContext->OMSetRenderTargets(1, &rtv, nullptr);
 	}
 	else
 	{

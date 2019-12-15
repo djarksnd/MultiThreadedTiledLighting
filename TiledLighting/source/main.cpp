@@ -1,47 +1,52 @@
-#include <memory>
-
 #include "..\\..\\DXUT\\Core\\DXUT.h"
 #include "..\\..\\DXUT\\Core\\DXUTmisc.h"
 #include "..\\..\\DXUT\\Optional\\DXUTgui.h"
 #include "..\\..\\DXUT\\Optional\\DXUTCamera.h"
-#include "..\\..\\DXUT\\Optional\\DXUTSettingsDlg.h"
 #include "..\\..\\DXUT\\Optional\\SDKmisc.h"
-#include "..\\..\\DXUT\\Optional\\SDKmesh.h"
 
 #include "TiledRenderer.h"
 
-#pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console") 
+enum IDC
+{
+    IDC_TOGGLEFULLSCREEN,
+    IDC_MultiThreadedRendering,
+    IDC_VisualizeNumLights,
 
-using namespace DirectX;
+    IDC_NumPointLight,
+    IDC_NumPointLightSlide,
 
-static const int TEXT_LINE_HEIGHT = 15;
-float g_maxSceneDistance = 500.0f;
-CFirstPersonCamera g_camera;
+    IDC_NumSpotLight,
+    IDC_NumSpotLightSlide,
+
+    IDC_NumPointLightShadow,
+    IDC_NumPointLightShadowSlide,
+
+    IDC_NumSpotLightShadow,
+    IDC_NumSpotLightShadowSlide,
+};
+
 CDXUTDialogResourceManager g_dialogResourceManager;
-CD3DSettingsDlg g_SettingsDlg;
+CDXUTDialog g_HUD;
+CDXUTDialog g_SampleUI;
 std::shared_ptr<CDXUTTextHelper> g_textHelper;
 std::shared_ptr<TiledRenderer> g_renderer;
+CFirstPersonCamera g_camera;
+float g_maxSceneDistance = 500.0f;
 
 LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, bool* pbNoFurtherProcessing, void* pUserContext);
-void CALLBACK OnKeyboard(UINT nChar, bool bKeyDown, bool bAltDown, void* pUserContext);
 void CALLBACK OnGUIEvent(UINT nEvent, int nControlID, CDXUTControl* pControl, void* pUserContext);
-void CALLBACK OnFrameMove(double fTime, float fElapsedTime, void* pUserContext);
+void CALLBACK OnFrameMove(double fTime, float elapsedTime, void* pUserContext);
 bool CALLBACK ModifyDeviceSettings(DXUTDeviceSettings* pDeviceSettings, void* pUserContext);
-bool CALLBACK IsD3D11DeviceAcceptable(const CD3D11EnumAdapterInfo *AdapterInfo, UINT Output, const CD3D11EnumDeviceInfo *DeviceInfo, DXGI_FORMAT BackBufferFormat, bool bWindowed, void* pUserContext);
 HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext);
 HRESULT CALLBACK OnD3D11ResizedSwapChain(ID3D11Device* pd3dDevice, IDXGISwapChain* pSwapChain, const DXGI_SURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext);
 void CALLBACK OnD3D11ReleasingSwapChain(void* pUserContext);
 void CALLBACK OnD3D11DestroyDevice(void* pUserContext);
-void CALLBACK OnD3D11FrameRender(ID3D11Device* pd3dDevice, ID3D11DeviceContext* pd3dImmediateContext, double fTime, float fElapsedTime, void* pUserContext);
+void CALLBACK OnD3D11FrameRender(ID3D11Device* pd3dDevice, ID3D11DeviceContext* pd3dImmediateContext, double fTime, float elapsedTime, void* pUserContext);
 
-void InitApp();
-void RenderText();
-void UpdateUI();
+void InitializeGUI();
+void RenderGUI(float elapsedTime);
+void UpdateGUI();
 
-//--------------------------------------------------------------------------------------
-// Entry point to the program. Initializes everything and goes into a message processing 
-// loop. Idle time is used to render the scene.
-//--------------------------------------------------------------------------------------
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	// Enable run-time memory check for debug builds.
@@ -50,78 +55,96 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 #endif
 	// Set DXUT callbacks
 	DXUTSetCallbackMsgProc(MsgProc);
-	DXUTSetCallbackKeyboard(OnKeyboard);
 	DXUTSetCallbackFrameMove(OnFrameMove);
 	DXUTSetCallbackDeviceChanging(ModifyDeviceSettings);
 
-	DXUTSetCallbackD3D11DeviceAcceptable(IsD3D11DeviceAcceptable);
 	DXUTSetCallbackD3D11DeviceCreated(OnD3D11CreateDevice);
 	DXUTSetCallbackD3D11SwapChainResized(OnD3D11ResizedSwapChain);
 	DXUTSetCallbackD3D11SwapChainReleasing(OnD3D11ReleasingSwapChain);
 	DXUTSetCallbackD3D11DeviceDestroyed(OnD3D11DestroyDevice);
 	DXUTSetCallbackD3D11FrameRender(OnD3D11FrameRender);
 
-	InitApp();
+    InitializeGUI();
 	DXUTInit(true, true, NULL); 
 	DXUTSetCursorSettings(true, true);
 	DXUTCreateWindow(L"TiledRendering");
-
 	DXUTCreateDevice(D3D_FEATURE_LEVEL_11_0, true, 1280, 800);
-	//DXUTCreateDevice(D3D_FEATURE_LEVEL_11_0, true, 1920, 1080);
-
+  
 	SetFocus(DXUTGetHWND());
-
-	DXUTMainLoop(); // Enter into the DXUT render loop
+	DXUTMainLoop(); 
 
 	return DXUTGetExitCode();
 }
 
-
-//--------------------------------------------------------------------------------------
-// Create the app 
-//--------------------------------------------------------------------------------------
-void InitApp()
+void InitializeGUI()
 {
 	WCHAR szTemp[256];
 	D3DCOLOR DlgColor = 0x88888888;
-	g_SettingsDlg.Init(&g_dialogResourceManager);
+    g_HUD.Init(&g_dialogResourceManager);
+    g_SampleUI.Init(&g_dialogResourceManager);
 
-	UpdateUI();
+    g_HUD.SetCallback(OnGUIEvent);
+    int iY = 10;
+    g_HUD.AddButton(IDC_TOGGLEFULLSCREEN, L"Toggle full screen", 35, iY, 125, 22);
+
+    g_SampleUI.SetCallback(OnGUIEvent);
+
+    g_SampleUI.AddStatic(IDC_NumPointLight, L"NumPointLights :", -15, iY += 24, 125, 22);
+    g_SampleUI.AddSlider(IDC_NumPointLightSlide, 0, iY += 24, 100, 22, 0,
+                         TiledRenderer::NumMaxPointLights, 0);
+
+    g_SampleUI.AddStatic(IDC_NumSpotLight, L"NumSpotLight :", -15, iY += 24, 125, 22);
+    g_SampleUI.AddSlider(IDC_NumSpotLightSlide, 0, iY += 24, 100, 22, 0,
+                         TiledRenderer::NumMaxSpotLights, 0);
+
+    g_SampleUI.AddStatic(IDC_NumPointLightShadow, L"NumPointLightShadow :", -15, iY += 24, 125, 22);
+    g_SampleUI.AddSlider(IDC_NumPointLightShadowSlide, 0, iY += 24, 100, 22, 0,
+                         ShadowDepthBuffer::NumMaxPointLightShadows, 0);
+
+    g_SampleUI.AddStatic(IDC_NumSpotLightShadow, L"NumSpotLightShadow :", -15, iY += 24, 125, 22);
+    g_SampleUI.AddSlider(IDC_NumSpotLightShadowSlide, 0, iY += 24, 100, 22, 0,
+                         ShadowDepthBuffer::NumMaxSpotLightShadows, 0);
+
+    {
+        iY += 24;
+        g_SampleUI.AddCheckBox(IDC_MultiThreadedRendering, L"MultiThreadedRendering", -50, iY += 24, 200, 22, false);
+    }
+
+    {
+        iY += 24;
+        g_SampleUI.AddCheckBox(IDC_VisualizeNumLights, L"VisualizeNumLights", -50, iY += 24, 200, 22, false);
+    }
+
+    UpdateGUI();
 }
 
 
-//--------------------------------------------------------------------------------------
-// Render the help and statistics text. This function uses the ID3DXFont interface for 
-// efficient text rendering.
-//--------------------------------------------------------------------------------------
-void RenderText()
+void RenderGUI(float elapsedTime)
 {
-	g_textHelper->Begin();
-	g_textHelper->SetInsertionPos(5, 5);
-	g_textHelper->SetForegroundColor(XMVectorSet(1.0f, 1.0f, 0.0f, 1.0f));
-	g_textHelper->DrawTextLine(DXUTGetFrameStats(DXUTIsVsyncEnabled()));
-	g_textHelper->DrawTextLine(DXUTGetDeviceStats());
+    ID3D11DeviceContext* deviceContext = DXUTGetD3D11DeviceContext();
+    ID3D11RenderTargetView* renderTargetView = DXUTGetD3D11RenderTargetView();
 
+    D3D11_VIEWPORT viewPort;
+    viewPort.TopLeftX = 0;
+    viewPort.TopLeftY = 0;
+    viewPort.Width = static_cast<float>(g_renderer->GetScreenWidth());
+    viewPort.Height = static_cast<float>(g_renderer->GetScreenHeight());
+    viewPort.MinDepth = 0.0f;
+    viewPort.MaxDepth = 1.0f;
+    deviceContext->RSSetViewports(1, &viewPort);
 
+    deviceContext->OMSetRenderTargets(1, &renderTargetView, nullptr);
+    g_HUD.OnRender(elapsedTime);
+    g_SampleUI.OnRender(elapsedTime);
 
-
-	g_textHelper->End();
+    g_textHelper->Begin();
+    g_textHelper->SetInsertionPos(5, 5);
+    g_textHelper->SetForegroundColor(DirectX::XMVectorSet(1.0f, 1.0f, 0.0f, 1.0f));
+    g_textHelper->DrawTextLine(DXUTGetFrameStats(DXUTIsVsyncEnabled()));
+    g_textHelper->DrawTextLine(DXUTGetDeviceStats());
+    g_textHelper->End();
 }
 
-
-//--------------------------------------------------------------------------------------
-// Reject any D3D11 devices that aren't acceptable by returning false
-//--------------------------------------------------------------------------------------
-bool CALLBACK IsD3D11DeviceAcceptable(const CD3D11EnumAdapterInfo *AdapterInfo, UINT Output, const CD3D11EnumDeviceInfo *DeviceInfo,
-									  DXGI_FORMAT BackBufferFormat, bool bWindowed, void* pUserContext)
-{
-	return true;
-}
-
-
-//--------------------------------------------------------------------------------------
-// Create any D3D11 resources that aren't dependant on the back buffer
-//--------------------------------------------------------------------------------------
 HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFACE_DESC* pBackBufferSurfaceDesc,
 									 void* pUserContext)
 {
@@ -129,9 +152,8 @@ HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFAC
 
 	ID3D11DeviceContext* pd3dImmediateContext = DXUTGetD3D11DeviceContext();
 	V_RETURN(g_dialogResourceManager.OnD3D11CreateDevice(pd3dDevice, pd3dImmediateContext));
-	V_RETURN(g_SettingsDlg.OnD3D11CreateDevice(pd3dDevice));
 	g_textHelper = std::shared_ptr<CDXUTTextHelper>(
-		new CDXUTTextHelper(pd3dDevice, pd3dImmediateContext, &g_dialogResourceManager, TEXT_LINE_HEIGHT));
+		new CDXUTTextHelper(pd3dDevice, pd3dImmediateContext, &g_dialogResourceManager, 15));
 
 	g_renderer = std::shared_ptr<TiledRenderer>(new TiledRenderer);
 	if (g_renderer)
@@ -144,6 +166,7 @@ HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFAC
 						   pBackBufferSurfaceDesc->Height,
 						   pBackBufferSurfaceDesc->SampleDesc.Count);
 
+        using namespace DirectX;
 		const XMVECTOR SceneMin = DirectX::XMLoadFloat3(&g_renderer->GetSceneBoundMin());
 		const XMVECTOR SceneMax = DirectX::XMLoadFloat3(&g_renderer->GetSceneBoundMax());
 
@@ -163,22 +186,21 @@ HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFAC
 		XMStoreFloat3(&vBoundaryMin, BoundaryMin);
 		XMStoreFloat3(&vBoundaryMax, BoundaryMax);
 		g_camera.SetClipToBoundary(true, &vBoundaryMin, &vBoundaryMax);
+
+        UpdateGUI();
 	}
+
+    DXUTGetDXGIFactory()->MakeWindowAssociation(DXUTGetHWND(), DXGI_MWA_NO_ALT_ENTER);
 
 	return S_OK;
 }
 
-
-//--------------------------------------------------------------------------------------
-// Create any D3D11 resources that depend on the back buffer
-//--------------------------------------------------------------------------------------
 HRESULT CALLBACK OnD3D11ResizedSwapChain(ID3D11Device* pd3dDevice, IDXGISwapChain* pSwapChain,
 										 const DXGI_SURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext)
 {
 	HRESULT hr;
 
 	V_RETURN(g_dialogResourceManager.OnD3D11ResizedSwapChain(pd3dDevice, pBackBufferSurfaceDesc));
-	V_RETURN(g_SettingsDlg.OnD3D11ResizedSwapChain(pd3dDevice, pBackBufferSurfaceDesc));
 
 	if (g_renderer)
 	{
@@ -188,68 +210,38 @@ HRESULT CALLBACK OnD3D11ResizedSwapChain(ID3D11Device* pd3dDevice, IDXGISwapChai
 	}
 
 	float aspectRatio = static_cast<float>(pBackBufferSurfaceDesc->Width) / static_cast<float>(pBackBufferSurfaceDesc->Height);
-	g_camera.SetProjParams(XM_PI / 4.0f, aspectRatio, g_maxSceneDistance, 1.0f);
+	g_camera.SetProjParams(DirectX::XM_PI / 4.0f, aspectRatio, g_maxSceneDistance, 1.0f);
+
+    g_HUD.SetLocation(pBackBufferSurfaceDesc->Width - 170, 0);
+    g_HUD.SetSize(170, 170);
+    g_SampleUI.SetLocation(pBackBufferSurfaceDesc->Width - 170, pBackBufferSurfaceDesc->Height - 500);
+    g_SampleUI.SetSize(300, 800);
 
 	return S_OK;
 }
 
-
-//--------------------------------------------------------------------------------------
-// Render the scene using the D3D11 device
-//--------------------------------------------------------------------------------------
 void CALLBACK OnD3D11FrameRender(ID3D11Device* pd3dDevice, ID3D11DeviceContext* pd3dImmediateContext, double fTime,
-								 float fElapsedTime, void* pUserContext)
+								 float elapsedTime, void* pUserContext)
 {
-	static float time = 0.0f;
-	static int frame = 0;
-
-	time += fElapsedTime;
-	frame++;
-
-	if (time > 1.f)
-	{
-		float fps = (float)(frame) / time;
-		std::wstring text = std::to_wstring(fps);
-		SetWindowText(DXUTGetHWND(), text.c_str());
-
-		frame = 0;
-		time = 0.0f;
-	}
-
-	// If the settings dialog is being shown, then render it instead of rendering the app's scene
-	if (g_SettingsDlg.IsActive())
-	{
-		g_SettingsDlg.OnRender(fElapsedTime);
-		return;
-	}
-
 	if (g_renderer)
 		g_renderer->Render(g_camera);
 
-	RenderText();
+	RenderGUI(elapsedTime);
 }
 
-
-//--------------------------------------------------------------------------------------
-// Destroy D3D11 resources created in OnD3D11ResizedSwapChain 
-//--------------------------------------------------------------------------------------
 void CALLBACK OnD3D11ReleasingSwapChain(void* pUserContext)
 {
 	g_dialogResourceManager.OnD3D11ReleasingSwapChain();
 }
 
-
-//--------------------------------------------------------------------------------------
-// Destroy D3D11 resources created in OnD3D11CreateDevice 
-//--------------------------------------------------------------------------------------
 void CALLBACK OnD3D11DestroyDevice(void* pUserContext)
 {
-	if (g_renderer)
-		g_renderer.reset();
+	g_renderer.reset();
 
 	g_dialogResourceManager.OnD3D11DestroyDevice();
-	g_SettingsDlg.OnD3D11DestroyDevice();
 	DXUTGetGlobalResourceCache().OnDestroyDevice();
+
+    g_textHelper.reset();
 }
 
 bool CALLBACK ModifyDeviceSettings(DXUTDeviceSettings* pDeviceSettings, void* pUserContext)
@@ -278,13 +270,12 @@ bool CALLBACK ModifyDeviceSettings(DXUTDeviceSettings* pDeviceSettings, void* pU
 	return true;
 }
 
-void CALLBACK OnFrameMove(double fTime, float fElapsedTime, void* pUserContext)
+void CALLBACK OnFrameMove(double fTime, float elapsedTime, void* pUserContext)
 {
-	// Update the camera's position based on user input 
 	if (g_renderer)
-		g_renderer->Update(fElapsedTime);
+		g_renderer->Update(elapsedTime);
 
-	g_camera.FrameMove(fElapsedTime);
+	g_camera.FrameMove(elapsedTime);
 }
 
 LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, bool* pbNoFurtherProcessing,
@@ -293,66 +284,141 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
 	switch (uMsg)
 	{
 	case WM_GETMINMAXINFO:
-		// override DXUT_MIN_WINDOW_SIZE_X and DXUT_MIN_WINDOW_SIZE_Y
-		// to prevent windows that are too small
 		((MINMAXINFO*)lParam)->ptMinTrackSize.x = 512;
 		((MINMAXINFO*)lParam)->ptMinTrackSize.y = 512;
 		*pbNoFurtherProcessing = true;
 		break;
 	}
-	if (*pbNoFurtherProcessing)
-		return 0;
 
-	// Pass messages to dialog resource manager calls so GUI state is updated correctly
 	*pbNoFurtherProcessing = g_dialogResourceManager.MsgProc(hWnd, uMsg, wParam, lParam);
 	if (*pbNoFurtherProcessing)
 		return 0;
 
-	//Pass messages to settings dialog if its active
-	if (g_SettingsDlg.IsActive())
-	{
-		g_SettingsDlg.MsgProc(hWnd, uMsg, wParam, lParam);
-		return 0;
-	}
+    *pbNoFurtherProcessing = g_HUD.MsgProc(hWnd, uMsg, wParam, lParam);
+    if (*pbNoFurtherProcessing)
+        return 0;
 
-	// Pass all remaining windows messages to camera so it can respond to user input
+    *pbNoFurtherProcessing = g_SampleUI.MsgProc(hWnd, uMsg, wParam, lParam);
+    if (*pbNoFurtherProcessing)
+        return 0;
+
 	g_camera.HandleMessages(hWnd, uMsg, wParam, lParam);
 
 	return 0;
 }
 
-void CALLBACK OnKeyboard(UINT nChar, bool bKeyDown, bool bAltDown, void* pUserContext)
-{
-	if (bKeyDown)
-	{
-		switch (nChar)
-		{
-		case VK_F1:
-			//g_bRenderHUD = !g_bRenderHUD;
-			break;
-		}
-	}
-}
-
 void CALLBACK OnGUIEvent(UINT nEvent, int nControlID, CDXUTControl* pControl, void* pUserContext)
 {
-
+    switch (nControlID)
+    {
+    case IDC_TOGGLEFULLSCREEN:
+        DXUTToggleFullScreen();
+        break;
+    case IDC_MultiThreadedRendering:
+    {
+        if (g_renderer)
+        {
+            const bool enable = g_SampleUI.GetCheckBox(IDC_MultiThreadedRendering)->GetChecked();
+            g_renderer->SetEnableMultiThreadedRendering(enable);
+        }
+        break;
+    }
+    case IDC_VisualizeNumLights:
+    {
+        if (g_renderer)
+        {
+            const bool enable = g_SampleUI.GetCheckBox(IDC_VisualizeNumLights)->GetChecked();
+            g_renderer->SetVisualizeNumLights(enable);
+        }
+        break;
+    }
+    case IDC_NumPointLightSlide:
+    {
+        if (g_renderer)
+        {
+            const size_t numLimit = g_SampleUI.GetSlider(IDC_NumPointLightSlide)->GetValue();
+            const std::wstring text = std::wstring(L"NumPointLight : ") + std::to_wstring(numLimit);
+            g_SampleUI.GetStatic(IDC_NumPointLight)->SetText(text.c_str());
+            g_renderer->SetNumPointLightLimit(numLimit);
+        }
+        break;
+    }
+    case IDC_NumSpotLightSlide:
+    {
+        if (g_renderer)
+        {
+            const size_t numLimit = g_SampleUI.GetSlider(IDC_NumSpotLightSlide)->GetValue();
+            const std::wstring text = std::wstring(L"NumSpotLight : ") + std::to_wstring(numLimit);
+            g_SampleUI.GetStatic(IDC_NumSpotLight)->SetText(text.c_str());
+            g_renderer->SetNumSpotLightLimit(numLimit);
+        }
+        break;
+    }
+    case IDC_NumPointLightShadowSlide:
+    {
+        if (g_renderer)
+        {
+            const size_t numLimit = g_SampleUI.GetSlider(IDC_NumPointLightShadowSlide)->GetValue();
+            const std::wstring text = std::wstring(L"NumPointLightShadow : ") + std::to_wstring(numLimit);
+            g_SampleUI.GetStatic(IDC_NumPointLightShadow)->SetText(text.c_str());
+            g_renderer->SetNumPointLightShadowLimit(numLimit);
+        }
+        break;
+    }
+    case IDC_NumSpotLightShadowSlide:
+    {
+        if (g_renderer)
+        {
+            const size_t numLimit = g_SampleUI.GetSlider(IDC_NumSpotLightShadowSlide)->GetValue();
+            const std::wstring text = std::wstring(L"NumSpotLightShadow : ") + std::to_wstring(numLimit);
+            g_SampleUI.GetStatic(IDC_NumSpotLightShadow)->SetText(text.c_str());
+            g_renderer->SetNumSpotLightShadowLimit(numLimit);
+        }
+        break;
+    }
+    }
 }
 
-void UpdateUI()
+void UpdateGUI()
 {
-	//bool bShadowMode = (g_LightingMode == LIGHTING_SHADOWS);
+    if (!g_renderer)
+        return;
 
-	//int maxPointLights = bShadowMode ? MAX_NUM_SHADOWCASTING_POINTS : MAX_NUM_LIGHTS;
-	//g_iNumActivePointLights = bShadowMode ? MAX_NUM_SHADOWCASTING_POINTS : MAX_NUM_LIGHTS;
-	//g_HUD.m_GUI.GetSlider(IDC_SLIDER_NUM_POINT_LIGHTS)->SetRange(0, maxPointLights);
-	//g_HUD.m_GUI.GetSlider(IDC_SLIDER_NUM_POINT_LIGHTS)->SetValue(g_iNumActivePointLights);
+    {
+        const size_t numLimit = g_renderer->GetNumPointLightLimit();
+        const std::wstring text = std::wstring(L"NumPointLight : ") + std::to_wstring(numLimit);
+        g_SampleUI.GetStatic(IDC_NumPointLight)->SetText(text.c_str());
+        g_SampleUI.GetSlider(IDC_NumPointLightSlide)->SetValue(numLimit);
+    }
 
-	//int maxSpotLights = bShadowMode ? MAX_NUM_SHADOWCASTING_SPOTS : MAX_NUM_LIGHTS;
-	//g_iNumActiveSpotLights = bShadowMode ? 0 : 0;
-	//g_HUD.m_GUI.GetSlider(IDC_SLIDER_NUM_SPOT_LIGHTS)->SetRange(0, maxSpotLights);
-	//g_HUD.m_GUI.GetSlider(IDC_SLIDER_NUM_SPOT_LIGHTS)->SetValue(g_iNumActiveSpotLights);
+    {
+        const size_t numLimit = g_renderer->GetNumSpotLightLimit();
+        const std::wstring text = std::wstring(L"NumSpotLight : ") + std::to_wstring(numLimit);
+        g_SampleUI.GetStatic(IDC_NumSpotLight)->SetText(text.c_str());
+        g_SampleUI.GetSlider(IDC_NumSpotLightSlide)->SetValue(numLimit);
+    }
 
-	//g_NumPointLightsSlider->OnGuiEvent();
-	//g_NumSpotLightsSlider->OnGuiEvent();
+    {
+        const size_t numLimit = g_renderer->GetShadowDepthBuffer().GetNumPointLightShadowLimit();
+        const std::wstring text = std::wstring(L"NumPointLightShadow : ") + std::to_wstring(numLimit);
+        g_SampleUI.GetStatic(IDC_NumPointLightShadow)->SetText(text.c_str());
+        g_SampleUI.GetSlider(IDC_NumPointLightShadowSlide)->SetValue(numLimit);
+    }
+
+    {
+        const size_t numLimit = g_renderer->GetShadowDepthBuffer().GetNumSpotLightShadowLimit();
+        const std::wstring text = std::wstring(L"NumSpotLightShadow : ") + std::to_wstring(numLimit);
+        g_SampleUI.GetStatic(IDC_NumSpotLightShadow)->SetText(text.c_str());
+        g_SampleUI.GetSlider(IDC_NumSpotLightShadowSlide)->SetValue(numLimit);
+    }
+
+    {
+        const bool enable = g_renderer->GetEnableMultiThreadedRendering();
+        g_SampleUI.GetCheckBox(IDC_MultiThreadedRendering)->SetChecked(enable);
+    }
+
+    {
+        const bool enable = g_renderer->GetVisualizeNumLights();
+        g_SampleUI.GetCheckBox(IDC_VisualizeNumLights)->SetChecked(enable);
+    }
 }
