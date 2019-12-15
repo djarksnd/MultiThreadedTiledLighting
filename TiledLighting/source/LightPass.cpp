@@ -303,12 +303,8 @@ void LightPass::RenderLights(const TiledRenderer& renderer)
 
 	if (renderer.GetVisualizeNumLights())
 	{
-        deviceContext->PSSetShader(deferredLightingPixelShader, nullptr, 0);
-        deviceContext->OMSetRenderTargets(1, &rtv, renderer.GetSceneDepthStencilBuffer().GetReadOnlyDepthStencilView());
-        deviceContext->OMSetBlendState(deferredLightingBlendState, nullptr, 0xffffffff);
-        deviceContext->OMSetDepthStencilState(deferredLightingDepthStencilState, TiledRenderer::StenCilMask::DeferredLightable);
 		deviceContext->PSSetShader(visualizeNumLightsPixelShader, nullptr, 0);
-		//deviceContext->OMSetRenderTargets(1, &rtv, nullptr);
+		deviceContext->OMSetRenderTargets(1, &rtv, nullptr);
 	}
 	else
 	{

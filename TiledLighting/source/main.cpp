@@ -112,7 +112,7 @@ void InitializeGUI()
 
     {
         iY += 24;
-        g_SampleUI.AddCheckBox(IDC_VisualizeNumLights, L"VisualizeNumLights", -50, iY += 24, 200, 22, false);
+        g_SampleUI.AddCheckBox(IDC_VisualizeNumLights, L"VisualizeNumLightsPerTile", -50, iY += 24, 200, 22, false);
     }
 
     UpdateGUI();

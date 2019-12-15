@@ -16,7 +16,9 @@
 *.lastbuildstate
 *.ilk
 *.VC.db
+*.iobj
+*.ipdb
+*.idb
 .vs
 /ipch
-Bin
 /wiki
