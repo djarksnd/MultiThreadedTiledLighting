@@ -156,7 +156,7 @@ void TiledRenderer::InitLights()
 			light.position.x = MathHelper::Lerp(sceneBoundMin.x, sceneBoundMax.x, static_cast<float>(dist(gen)) / 1024.0f);
 			light.position.y = MathHelper::Lerp(sceneBoundMin.y, sceneBoundMax.y, static_cast<float>(dist(gen)) / 1024.0f);
 			light.position.z = MathHelper::Lerp(sceneBoundMin.z, sceneBoundMax.z, static_cast<float>(dist(gen)) / 1024.0f);
-			light.radius = MathHelper::Lerp(100.0f, 200.0f, static_cast<float>(dist(gen)) / 1024.0f);
+			light.radius = MathHelper::Lerp(100.0f, 150.0f, static_cast<float>(dist(gen)) / 1024.0f);
 			light.color.x = MathHelper::Lerp(0.15f, 1.0f, static_cast<float>(dist(gen)) / 1024.0f);
 			light.color.y = MathHelper::Lerp(0.15f, 1.0f, static_cast<float>(dist(gen)) / 1024.0f);
 			light.color.z = MathHelper::Lerp(0.15f, 1.0f, static_cast<float>(dist(gen)) / 1024.0f);
@@ -208,7 +208,7 @@ void TiledRenderer::InitLights()
 			light.direction.y = MathHelper::Lerp(-1.0f, 1.0f, static_cast<float>(dist(gen)) / 1024.0f);
 			light.direction.z = MathHelper::Lerp(-1.0f, 1.0f, static_cast<float>(dist(gen)) / 1024.0f);
 			DirectX::XMStoreFloat3(&light.direction, DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&light.direction)));
-			light.cosHalfAngle = cosf(MathHelper::DegreeToRadian(22.5f));
+            light.cosHalfAngle = cosf(MathHelper::DegreeToRadian(22.5f));
 		}
 
 		++index;
