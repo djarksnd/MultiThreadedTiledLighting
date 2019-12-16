@@ -210,9 +210,8 @@ private:
 
 	mutable std::vector<RenderingTask> renderingTasks;
 	std::array<RenderingThread, NumRenderingThreads> threads;
-	std::condition_variable conditionVariable;
-	std::mutex condVarMtx;
 	std::shared_mutex sharedMutex;
+    std::unique_lock<std::shared_mutex> mutexLock;
 	std::atomic_int taskIndex;
 
 	bool enableMultiThreadedRendering = true;

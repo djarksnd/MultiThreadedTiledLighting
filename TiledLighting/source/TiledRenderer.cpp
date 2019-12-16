@@ -71,6 +71,8 @@ bool TiledRenderer::Create(ID3D11Device* argDevice, ID3D11DeviceContext* immedia
 	if (!lightPass.Create(*this))
 		return false;
 
+    mutexLock = std::unique_lock<std::shared_mutex>(sharedMutex);
+
 	for (auto& thread : threads)
 	{
 		thread.run = true;
@@ -260,7 +262,8 @@ TiledRenderer::~TiledRenderer()
 	for (auto& thread : threads)
 		thread.run = false;
 
-	conditionVariable.notify_all();
+    mutexLock.unlock();
+    std::this_thread::yield();
 
 	for (auto& thread : threads)
 		thread.thread.join();
@@ -396,7 +399,6 @@ bool TiledRenderer::Resize(unsigned int argScreenWidth, unsigned int argScreenHe
 		Texture::Dimension::Dimension2D))
 		return false;
 
-
 	if (!geometryPass.Resize(*this))
 		return false;
 
@@ -448,17 +450,17 @@ void TiledRenderer::FlushRenderTasks()
 		return;
 
 	taskIndex.store(0);
-
-	conditionVariable.notify_all();
+    mutexLock.unlock();
 
 	while (true)
 	{
 		std::this_thread::yield();
+        mutexLock.lock();
 
-		std::lock_guard<std::shared_mutex> lock(sharedMutex);
-
-		if (taskIndex.load() >= renderingTasks.size())
-			break;
+		if (taskIndex.load() < renderingTasks.size())
+            mutexLock.unlock();
+        else
+            break;
 	}
 
 	for (auto& task : renderingTasks)
@@ -477,11 +479,7 @@ void TiledRenderer::RenderingThreadProc(RenderingThread& thread, TiledRenderer& 
 {
 	while (thread.run)
 	{
-		{
-			std::unique_lock<std::mutex> lock(renderer.condVarMtx);
-			renderer.conditionVariable.wait(lock);
-		}
-		
+        std::this_thread::yield();
 		std::shared_lock<std::shared_mutex> sharedLock(renderer.sharedMutex);
 
 		while (true)
