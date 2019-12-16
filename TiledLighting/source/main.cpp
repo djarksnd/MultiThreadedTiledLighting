@@ -5,6 +5,7 @@
 #include "..\\..\\DXUT\\Optional\\SDKmisc.h"
 
 #include "TiledRenderer.h"
+#include "MathHelper.h"
 
 enum IDC
 {
@@ -23,6 +24,9 @@ enum IDC
 
     IDC_NumSpotLightShadow,
     IDC_NumSpotLightShadowSlide,
+
+    IDC_Gamma,
+    IDC_GammaSlide,
 };
 
 CDXUTDialogResourceManager g_dialogResourceManager;
@@ -77,7 +81,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 void InitializeGUI()
 {
-    WCHAR szTemp[256];
     D3DCOLOR DlgColor = 0x88888888;
     g_HUD.Init(&g_dialogResourceManager);
     g_HUD.SetBackgroundColors(DlgColor);
@@ -107,6 +110,9 @@ void InitializeGUI()
 
     iY += 24;
     g_HUD.AddCheckBox(IDC_VisualizeNumLights, L"VisualizeNumLightsPerTile", 20, iY += 24, 200, 22, false);
+
+    g_HUD.AddStatic(IDC_Gamma, L"Gamma :", 40, iY += 40, 125, 22);
+    g_HUD.AddSlider(IDC_GammaSlide, 25, iY += 24, 200, 22, 0, 50, 0);
 
     UpdateGUI();
 }
@@ -205,7 +211,7 @@ HRESULT CALLBACK OnD3D11ResizedSwapChain(ID3D11Device* pd3dDevice, IDXGISwapChai
     g_camera.SetProjParams(DirectX::XM_PI / 4.0f, aspectRatio, g_maxSceneDistance, 1.0f);
 
     g_HUD.SetLocation(pBackBufferSurfaceDesc->Width - 250, 0);
-    g_HUD.SetSize(250, 350);
+    g_HUD.SetSize(250, 400);
 
     return S_OK;
 }
@@ -362,6 +368,18 @@ void CALLBACK OnGUIEvent(UINT nEvent, int nControlID, CDXUTControl* pControl, vo
         }
         break;
     }
+    case IDC_GammaSlide:
+    {
+        if (g_renderer)
+        {
+            const int value = g_HUD.GetSlider(IDC_GammaSlide)->GetValue();
+            const float gamma = MathHelper::Lerp<float>(0.5f, 1.5f, static_cast<float>(value) / 50.0f);
+            const std::wstring text = std::wstring(L"Gamma : ") + std::to_wstring(gamma);
+            g_HUD.GetStatic(IDC_Gamma)->SetText(text.c_str());
+            g_renderer->SetGamma(gamma);
+        }
+        break;
+    }
     }
 }
 
@@ -406,5 +424,14 @@ void UpdateGUI()
     {
         const bool enable = g_renderer->GetVisualizeNumLights();
         g_HUD.GetCheckBox(IDC_VisualizeNumLights)->SetChecked(enable);
+    }
+
+    {
+        const float gamma = g_renderer->GetGamma();
+        const std::wstring text = std::wstring(L"Gamma : ") + std::to_wstring(gamma);
+        g_HUD.GetStatic(IDC_Gamma)->SetText(text.c_str());
+
+        const int value = MathHelper::Min(static_cast<int>(ceil((gamma - 0.5f) * 50.0f)), 50);
+        g_HUD.GetSlider(IDC_GammaSlide)->SetValue(value);
     }
 }

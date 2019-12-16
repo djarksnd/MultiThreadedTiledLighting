@@ -122,6 +122,12 @@ public:
     void SetNumPointLightLimit(size_t num) {
         numPointLightLimit = num;
     }
+    float GetGamma() const {
+        return gamma;
+    }
+    void SetGamma(float value) {
+        gamma = value;
+    }
     size_t GetNumPointLightLimit() const {
         return numPointLightLimit;
     }
