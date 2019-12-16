@@ -158,8 +158,8 @@ float3 main(in PS_Input input) : SV_Target
 	end = begin + spotLightCounter[counterIndex];
 
 #if VisualizeNumLights
-	numLights = float(end - begin) / float(NumMaxSpotLightsPerTile);
-	return saturate(numLights);
+	numLights += float(end - begin) / float(NumMaxSpotLightsPerTile);
+	return saturate(numLights / 2.0f);
 #else
 	for (uint index = begin; index < end; ++index)
 	{
