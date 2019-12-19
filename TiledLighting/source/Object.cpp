@@ -189,7 +189,6 @@ void Object::Render(ID3D11DeviceContext* deviceContext, const Frustum& frustum)
 	if (0 < mesh.GetOutstandingBufferResources())
 		return;
 
-	unsigned int numRenderedSubsets = 0;
 	for (unsigned int meshIndex = 0; meshIndex < mesh.GetNumMeshes(); ++meshIndex)
 	{
 		const SDKMESH_MESH* sdkMesh = mesh.GetMesh(meshIndex);
@@ -223,8 +222,6 @@ void Object::Render(ID3D11DeviceContext* deviceContext, const Frustum& frustum)
 					continue;
 			}
 
-			numRenderedSubsets++;
-
 			const SDKMESH_SUBSET* subset = mesh.GetSubset(meshIndex, subsetIndex);
 			const D3D11_PRIMITIVE_TOPOLOGY PrimType =
 				mesh.GetPrimitiveType11(static_cast<SDKMESH_PRIMITIVE_TYPE>(subset->PrimitiveType));
@@ -245,10 +242,6 @@ void Object::Render(ID3D11DeviceContext* deviceContext, const Frustum& frustum)
 			deviceContext->DrawIndexed(IndexCount, IndexStart, VertexStart);
 		}
 	}
-
-	//unsigned int numSubset = mesh.GetNumSubsets(0);
-	//float drawRation = (float)numRenderedSubsets / (float)numSubset;
-	//std::cout << drawRation << std::endl;
 }
 
 void Object::GetBoundMixMax(DirectX::XMFLOAT3& outMin, DirectX::XMFLOAT3& outMax) const
