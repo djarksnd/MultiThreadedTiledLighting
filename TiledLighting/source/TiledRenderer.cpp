@@ -130,7 +130,7 @@ bool TiledRenderer::Create(ID3D11Device* argDevice, ID3D11DeviceContext* argImme
     if (!geometryPass.Create(*this))
         return false;
 
-    if (!shadowDepthBuffer.Create(*this, 1024))
+    if (!shadowDepthBuffer.Create(*this, 512))
         return false;
 
     if (!lightPass.Create(*this))

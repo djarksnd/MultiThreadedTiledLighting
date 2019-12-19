@@ -97,7 +97,7 @@ bool ShadowDepthBuffer::Create(const TiledRenderer& renderer,
 	rsDesc.FrontCounterClockwise = true;
 	rsDesc.DepthBias = 0;
 	rsDesc.DepthBiasClamp = 0.0f;
-	rsDesc.SlopeScaledDepthBias = 0.0f;
+	rsDesc.SlopeScaledDepthBias = -1.0f;
 	rsDesc.DepthClipEnable = true;
 	rsDesc.ScissorEnable = false;
 	rsDesc.MultisampleEnable = false;

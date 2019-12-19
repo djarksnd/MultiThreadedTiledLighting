@@ -57,7 +57,7 @@ float CalcPointLightShadow(in float4 worldPosition, uint lightIndex)
 						shadow += pointLightShadowDepthBuffer.SampleCmpLevelZero(
 							shadowDepthSampler,
 							texCoord,
-							shadowPosition.z + 0.000006f,
+							shadowPosition.z + 0.000008f,
 							int3(x, y, 0)).r;
 					}
 				}
