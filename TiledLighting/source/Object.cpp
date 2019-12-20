@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "Object.h"
 #include "Frustum.h"
 
@@ -133,7 +131,7 @@ void Object::Update()
 	{
 		for (unsigned int subsetIndex = 0; subsetIndex < mesh.GetNumSubsets(meshIndex); subsetIndex++)
 		{
-			DirectX::XMFLOAT3 boundsVertices[8] = {
+			const DirectX::XMFLOAT3 boundsVertices[8] = {
 				DirectX::XMFLOAT3(
 					orgSubsetBounds[meshIndex][subsetIndex].min.x,
 					orgSubsetBounds[meshIndex][subsetIndex].min.y,
@@ -172,8 +170,7 @@ void Object::Update()
 			DirectX::XMVECTOR max = DirectX::XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX);
 			for (auto& vertex : boundsVertices)
 			{
-				DirectX::XMVECTOR vert = DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&vertex), tramsform);
-
+				const DirectX::XMVECTOR vert = DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&vertex), tramsform);
 				min = DirectX::XMVectorMin(min, vert);
 				max = DirectX::XMVectorMax(max, vert);
 			}
@@ -215,12 +212,10 @@ void Object::Render(ID3D11DeviceContext* deviceContext, const Frustum& frustum)
 
 		for (unsigned int subsetIndex = 0; subsetIndex < mesh.GetNumSubsets(meshIndex); subsetIndex++)
 		{
-			{
-				if (!frustum.Test(
-					DirectX::XMLoadFloat3(&transformedSubsetBounds[meshIndex][subsetIndex].min),
-					DirectX::XMLoadFloat3(&transformedSubsetBounds[meshIndex][subsetIndex].max)))
-					continue;
-			}
+            if (!frustum.Test(
+                DirectX::XMLoadFloat3(&transformedSubsetBounds[meshIndex][subsetIndex].min),
+                DirectX::XMLoadFloat3(&transformedSubsetBounds[meshIndex][subsetIndex].max)))
+                continue;
 
 			const SDKMESH_SUBSET* subset = mesh.GetSubset(meshIndex, subsetIndex);
 			const D3D11_PRIMITIVE_TOPOLOGY PrimType =

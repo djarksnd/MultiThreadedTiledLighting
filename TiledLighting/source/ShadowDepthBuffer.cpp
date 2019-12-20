@@ -172,7 +172,7 @@ void ShadowDepthBuffer::RenderPointLightShadowDepth(const TiledRenderer& rendere
 			deviceContext->PSSetSamplers(0, 1, &sampler);
 
 			GeometryShaderCBuffer gsCbufferData;
-			gsCbufferData.renderTargetIndexOffset = renderTargetIndex * 6;
+			gsCbufferData.renderTargetIndexOffset = static_cast<uint32_t>(renderTargetIndex * 6);
 
 			for (size_t face = 0; face < 6; ++face)
 			{
@@ -275,7 +275,7 @@ void ShadowDepthBuffer::RenderSpotLightShadowDepth(const TiledRenderer& renderer
 
 			VertexShaderPerLightCBuffer cbufferData;
 			cbufferData.shadowMatrix = DirectX::XMMatrixTranspose(shadowMatrix);
-			cbufferData.renderTargetIndexOffset = renderTargetIndex;
+			cbufferData.renderTargetIndexOffset = static_cast<uint32_t>(renderTargetIndex);
 			vertexShaderPerLightCBuffer.Update(deviceContext, &cbufferData);
 
 			const Frustum shadowFrustum(DirectX::XMMatrixInverse(nullptr, shadowMatrix));

@@ -77,7 +77,7 @@ bool TiledRenderer::Create(ID3D11Device* argDevice, ID3D11DeviceContext* argImme
 
     mutexLock = std::unique_lock<std::shared_mutex>(sharedMutex);
 
-    const size_t NumRenderingThreads = MathHelper::Max(static_cast<int>(GetLogicalProcessorCount()) - 1, 0);
+    const size_t NumRenderingThreads = GetLogicalProcessorCount();
     if (NumRenderingThreads > 0)
     {
         threads.resize(NumRenderingThreads);
@@ -223,7 +223,7 @@ void TiledRenderer::InitLights()
     index = 0;
     for (auto& light : spotLights)
     {
-        if (index < 8)
+        if (index < ShadowDepthBuffer::NumMaxSpotLightShadows)
         {
             light.position.x = 0.0f;
             light.position.y = 0.0f;
@@ -389,7 +389,7 @@ void TiledRenderer::Update(float elapsedTime)
 
     for (std::size_t index = 0; index < spotLights.size(); ++index)
     {
-        if (index < 8)
+        if (index < ShadowDepthBuffer::NumMaxSpotLightShadows)
         {
             unsigned int first = static_cast<unsigned int>(trackTime + index);
             first = first % numTrackItems;

@@ -275,7 +275,8 @@ void LightPass::RenderLights(const TiledRenderer& renderer)
 	psCBufferData.numThreadsPerTileY = NumThreadsPerTileY;
 	psCBufferData.numTilesX = GetNumTileX(renderer.GetScreenWidth());
 
-	psCBufferData.numPointLightShadows = renderer.GetShadowDepthBuffer().GetNumCurrFramePointLightShadows();
+	psCBufferData.numPointLightShadows =
+        static_cast<uint32_t>(renderer.GetShadowDepthBuffer().GetNumCurrFramePointLightShadows());
 	for (unsigned int shadowIndex = 0; shadowIndex < renderer.GetShadowDepthBuffer().GetNumCurrFramePointLightShadows(); ++shadowIndex)
 	{
 		for (unsigned int face = 0; face < 6; ++face)
@@ -288,7 +289,8 @@ void LightPass::RenderLights(const TiledRenderer& renderer)
 		}
 	}
 
-	psCBufferData.numSpotLightShadows = renderer.GetShadowDepthBuffer().GetNumCurrFrameSpotLightShadows();
+	psCBufferData.numSpotLightShadows =
+        static_cast<uint32_t>(renderer.GetShadowDepthBuffer().GetNumCurrFrameSpotLightShadows());
 	for (unsigned int shadowIndex = 0; shadowIndex < renderer.GetShadowDepthBuffer().GetNumCurrFrameSpotLightShadows(); ++shadowIndex)
 	{
 		psCBufferData.spotLightShadowMatrices[shadowIndex] = ComputeSpotLightShadowMatrix(spotLights[shadowIndex]);

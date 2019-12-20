@@ -389,28 +389,28 @@ void UpdateGUI()
         return;
 
     {
-        const size_t numLimit = g_renderer->GetNumPointLightLimit();
+        const int numLimit = static_cast<int>(g_renderer->GetNumPointLightLimit());
         const std::wstring text = std::wstring(L"NumPointLight : ") + std::to_wstring(numLimit);
         g_HUD.GetStatic(IDC_NumPointLight)->SetText(text.c_str());
         g_HUD.GetSlider(IDC_NumPointLightSlide)->SetValue(numLimit);
     }
 
     {
-        const size_t numLimit = g_renderer->GetNumSpotLightLimit();
+        const int numLimit = static_cast<int>(g_renderer->GetNumSpotLightLimit());
         const std::wstring text = std::wstring(L"NumSpotLight : ") + std::to_wstring(numLimit);
         g_HUD.GetStatic(IDC_NumSpotLight)->SetText(text.c_str());
         g_HUD.GetSlider(IDC_NumSpotLightSlide)->SetValue(numLimit);
     }
 
     {
-        const size_t numLimit = g_renderer->GetShadowDepthBuffer().GetNumPointLightShadowLimit();
+        const int numLimit = static_cast<int>(g_renderer->GetShadowDepthBuffer().GetNumPointLightShadowLimit());
         const std::wstring text = std::wstring(L"NumPointLightShadow : ") + std::to_wstring(numLimit);
         g_HUD.GetStatic(IDC_NumPointLightShadow)->SetText(text.c_str());
         g_HUD.GetSlider(IDC_NumPointLightShadowSlide)->SetValue(numLimit);
     }
 
     {
-        const size_t numLimit = g_renderer->GetShadowDepthBuffer().GetNumSpotLightShadowLimit();
+        const int numLimit = static_cast<int>(g_renderer->GetShadowDepthBuffer().GetNumSpotLightShadowLimit());
         const std::wstring text = std::wstring(L"NumSpotLightShadow : ") + std::to_wstring(numLimit);
         g_HUD.GetStatic(IDC_NumSpotLightShadow)->SetText(text.c_str());
         g_HUD.GetSlider(IDC_NumSpotLightShadowSlide)->SetValue(numLimit);
