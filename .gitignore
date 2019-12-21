@@ -24,3 +24,5 @@
 .vs
 bin/TiledLighting_x64_debug.exe
 TiledLighting/shader-error.txt
+TiledLighting/x64/Release/TiledLighting_VS2019_Win10.vcxproj.FileListAbsolute.txt
+TiledLighting/x64/Debug/TiledLighting_VS2019_Win10.vcxproj.FileListAbsolute.txt
