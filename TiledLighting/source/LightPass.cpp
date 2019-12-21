@@ -270,7 +270,7 @@ void LightPass::RenderLights(const TiledRenderer& renderer)
 	DeferredLightingPSCBuffer psCBufferData;
 	psCBufferData.projectionMatrix = DirectX::XMMatrixTranspose(renderer.GetViewInfo().projectionMatrix);
 	psCBufferData.invViewProjectionMatrix = DirectX::XMMatrixTranspose(renderer.GetViewInfo().invViewProjectionMatrix);
-	psCBufferData.cameraPosition = renderer.GetViewInfo().viewOrigin;
+    DirectX::XMStoreFloat3(&psCBufferData.cameraPosition, renderer.GetViewInfo().viewOrigin);
 	psCBufferData.numThreadsPerTileX = NumThreadsPerTileX;
 	psCBufferData.numThreadsPerTileY = NumThreadsPerTileY;
 	psCBufferData.numTilesX = GetNumTileX(renderer.GetScreenWidth());

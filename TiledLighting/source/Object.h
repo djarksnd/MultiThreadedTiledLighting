@@ -19,23 +19,21 @@ public:
 	};
 
 public:
-	Object() : tramsform(DirectX::XMMatrixIdentity()) {}
+	Object() : transform(DirectX::XMMatrixIdentity()) {}
 	~Object() {
 		mesh.Destroy();
 	}
 
 	bool Create(ID3D11Device* device, ID3D11DeviceContext* ImmediateContext, const std::wstring& fileName);
-	void Update();
 	void Render(ID3D11DeviceContext* deviceContext, const Frustum& frustum);
 
 	void GetBoundMixMax(DirectX::XMFLOAT3& outMin, DirectX::XMFLOAT3& outMax) const;
-	void SetTransform(DirectX::FXMMATRIX argTransform) {
-		tramsform = argTransform;
+	void XM_CALLCONV SetTransform(DirectX::FXMMATRIX argTransform) {
+		transform = argTransform;
 	}
 	const DirectX::FXMMATRIX GetTransform() {
-		return tramsform;
+		return transform;
 	}
-
 	const CDXUTSDKMesh& GetMesh() const {
 		return mesh;
 	}
@@ -45,8 +43,6 @@ public:
 
 private:
 	CDXUTSDKMesh mesh;
-	DirectX::XMMATRIX tramsform;
-	Bound bound;
-	std::vector<std::vector<Bound>> orgSubsetBounds;
-	std::vector<std::vector<Bound>> transformedSubsetBounds;
+	DirectX::XMMATRIX transform;
+	std::vector<std::vector<Bound>> subsetBounds;
 };

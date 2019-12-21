@@ -137,7 +137,7 @@ void RenderGUI(float elapsedTime)
 
     g_textHelper->Begin();
     g_textHelper->SetInsertionPos(5, 5);
-    g_textHelper->SetForegroundColor(DirectX::XMVectorSet(1.0f, 1.0f, 0.0f, 1.0f));
+    g_textHelper->SetForegroundColor(DirectX::XMVECTORF32{ 1.0f, 1.0f, 0.0f, 1.0f });
     g_textHelper->DrawTextLine(DXUTGetFrameStats(DXUTIsVsyncEnabled()));
     g_textHelper->DrawTextLine(DXUTGetDeviceStats());
     g_textHelper->End();

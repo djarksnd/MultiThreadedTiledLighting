@@ -45,7 +45,7 @@ public:
         DirectX::XMMATRIX invViewMatrix;
         DirectX::XMMATRIX invProjectionMatrix;
         DirectX::XMMATRIX invViewProjectionMatrix;
-        DirectX::XMFLOAT3 viewOrigin;
+        DirectX::XMVECTOR viewOrigin;
     };
 
 private:

@@ -239,12 +239,12 @@ void TiledRenderer::InitLights()
             if (index % 2)
             {
                 light.radius = 1000.0f;
-                light.cosHalfAngle = cosf(MathHelper::DegreeToRadian(35.0f));
+                light.cosHalfAngle = cosf(DirectX::XMConvertToRadians(35.0f));
             }
             else
             {
                 light.radius = 3000.0f;
-                light.cosHalfAngle = cosf(MathHelper::DegreeToRadian(12.5f));
+                light.cosHalfAngle = cosf(DirectX::XMConvertToRadians(12.5f));
             }
         }
         else
@@ -261,7 +261,7 @@ void TiledRenderer::InitLights()
             light.direction.y = MathHelper::Lerp(-1.0f, 1.0f, static_cast<float>(dist(gen)) / 1024.0f);
             light.direction.z = MathHelper::Lerp(-1.0f, 1.0f, static_cast<float>(dist(gen)) / 1024.0f);
             DirectX::XMStoreFloat3(&light.direction, DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&light.direction)));
-            light.cosHalfAngle = cosf(MathHelper::DegreeToRadian(22.5f));
+            light.cosHalfAngle = cosf(DirectX::XMConvertToRadians(22.5f));
         }
 
         ++index;
@@ -335,35 +335,29 @@ TiledRenderer::~TiledRenderer()
 
 void TiledRenderer::Update(float elapsedTime)
 {
-    for (auto& object : opaqueObjects)
-        object->Update();
-
-    for (auto& object : opaqueObjects)
-        object->Update();
-
     // move lights
-    static const DirectX::XMFLOAT3 firstTrack[] =
+    static const DirectX::XMVECTORF32 firstTrack[] =
     {
-        { -1250.0f, 260.0f, -400.0f },
-        { -1250.0f, 260.0f,  400.0f },
-        {  -450.0f, 260.0f,  400.0f },
-        {   350.0f, 260.0f,  400.0f },
-        {  1150.0f, 260.0f,  400.0f },
-        {  1150.0f, 260.0f, -400.0f },
-        {   350.0f, 260.0f, -400.0f },
-        {  -450.0f, 260.0f, -400.0f },
+        { -1250.0f, 260.0f, -400.0f, 0.0f },
+        { -1250.0f, 260.0f,  400.0f, 0.0f },
+        {  -450.0f, 260.0f,  400.0f, 0.0f },
+        {   350.0f, 260.0f,  400.0f, 0.0f },
+        {  1150.0f, 260.0f,  400.0f, 0.0f },
+        {  1150.0f, 260.0f, -400.0f, 0.0f },
+        {   350.0f, 260.0f, -400.0f, 0.0f },
+        {  -450.0f, 260.0f, -400.0f, 0.0f },
     };
 
-    static const DirectX::XMFLOAT3 secondTrack[] =
+    static const DirectX::XMVECTORF32 secondTrack[] =
     {
-        { -1250.0f, 650.0f,  400.0f },
-        { -1250.0f, 650.0f, -400.0f },
-        {  -450.0f, 650.0f, -400.0f },
-        {   350.0f, 650.0f, -400.0f },
-        {  1150.0f, 650.0f, -400.0f },
-        {  1150.0f, 650.0f,  400.0f },
-        {   350.0f, 650.0f,  400.0f },
-        {  -450.0f, 650.0f,  400.0f },
+        { -1250.0f, 650.0f,  400.0f, 0.0f },
+        { -1250.0f, 650.0f, -400.0f, 0.0f },
+        {  -450.0f, 650.0f, -400.0f, 0.0f },
+        {   350.0f, 650.0f, -400.0f, 0.0f },
+        {  1150.0f, 650.0f, -400.0f, 0.0f },
+        {  1150.0f, 650.0f,  400.0f, 0.0f },
+        {   350.0f, 650.0f,  400.0f, 0.0f },
+        {  -450.0f, 650.0f,  400.0f, 0.0f },
     };
 
     static const unsigned int numTrackItems = ARRAYSIZE(firstTrack);
@@ -395,10 +389,8 @@ void TiledRenderer::Update(float elapsedTime)
             first = first % numTrackItems;
             unsigned int second = (first + 1) % numTrackItems;
 
-            const DirectX::XMFLOAT3* track = (index % 2) ? firstTrack : secondTrack;
-            DirectX::XMVECTOR position = DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&track[first]),
-                                                               DirectX::XMLoadFloat3(&track[second]),
-                                                               trackTime - floor(trackTime));
+            const DirectX::XMVECTORF32* track = (index % 2) ? firstTrack : secondTrack;
+            DirectX::XMVECTOR position = DirectX::XMVectorLerp(track[first], track[second], trackTime - floor(trackTime));
 
             DirectX::XMStoreFloat3(&spotLights[index].position, position);
             spotLights[index].direction = spotLights[index].position;
@@ -481,7 +473,7 @@ void TiledRenderer::Render(const CBaseCamera& camera)
     viewInfo.invViewMatrix = DirectX::XMMatrixInverse(nullptr, viewInfo.viewMatrix);
     viewInfo.invProjectionMatrix = DirectX::XMMatrixInverse(nullptr, viewInfo.projectionMatrix);
     viewInfo.invViewProjectionMatrix = DirectX::XMMatrixInverse(nullptr, viewInfo.viewProjectionMatrix);
-    DirectX::XMStoreFloat3(&viewInfo.viewOrigin, camera.GetEyePt());
+    viewInfo.viewOrigin = camera.GetEyePt();
 
     float clearColor[4] = { 0.0f };
     sceneRenderTarget.Clear(GetDeviceContext(), clearColor);

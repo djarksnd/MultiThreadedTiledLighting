@@ -6,8 +6,7 @@ bool Object::Create(ID3D11Device* device, ID3D11DeviceContext* ImmediateContext,
 	if (FAILED(mesh.Create(device, fileName.c_str())))
 		return false;
 
-	orgSubsetBounds.resize(mesh.GetNumMeshes());
-	transformedSubsetBounds.resize(mesh.GetNumMeshes());
+	subsetBounds.resize(mesh.GetNumMeshes());
 
 	for (unsigned int meshIndex = 0; meshIndex < mesh.GetNumMeshes(); ++meshIndex)
 	{
@@ -95,8 +94,7 @@ bool Object::Create(ID3D11Device* device, ID3D11DeviceContext* ImmediateContext,
 		//////////////////////////////////////////////////////////////////////////
 		// calc subsets bounds
 		//////////////////////////////////////////////////////////////////////////
-		orgSubsetBounds[meshIndex].resize(mesh.GetNumSubsets(meshIndex));
-		transformedSubsetBounds[meshIndex].resize(mesh.GetNumSubsets(meshIndex));
+		subsetBounds[meshIndex].resize(mesh.GetNumSubsets(meshIndex));
 
 		for (unsigned int subsetIndex = 0; subsetIndex < mesh.GetNumSubsets(meshIndex); subsetIndex++)
 		{
@@ -105,8 +103,8 @@ bool Object::Create(ID3D11Device* device, ID3D11DeviceContext* ImmediateContext,
 			const unsigned int IndexStart = static_cast<unsigned int>(subset->IndexStart);
 			const unsigned int VertexStart = static_cast<unsigned int>(subset->VertexStart);
 
-			DirectX::XMVECTOR boundMin = DirectX::XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, 1.0f);
-			DirectX::XMVECTOR boundMax = DirectX::XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, 1.0f);
+            DirectX::XMVECTOR boundMin = DirectX::XMVectorReplicate(FLT_MAX);
+            DirectX::XMVECTOR boundMax = DirectX::XMVectorReplicate(-FLT_MAX);
 
 			for (unsigned int i = IndexStart; i < IndexStart + IndexCount; ++i)
 			{
@@ -115,70 +113,43 @@ bool Object::Create(ID3D11Device* device, ID3D11DeviceContext* ImmediateContext,
 				boundMax = DirectX::XMVectorMax(boundMax, vertex);
 			}
 
-			DirectX::XMStoreFloat3(&orgSubsetBounds[meshIndex][subsetIndex].min, boundMin);
-			DirectX::XMStoreFloat3(&orgSubsetBounds[meshIndex][subsetIndex].max, boundMax);
-			DirectX::XMStoreFloat3(&transformedSubsetBounds[meshIndex][subsetIndex].min, boundMin);
-			DirectX::XMStoreFloat3(&transformedSubsetBounds[meshIndex][subsetIndex].max, boundMax);
+			DirectX::XMStoreFloat3(&subsetBounds[meshIndex][subsetIndex].min, boundMin);
+			DirectX::XMStoreFloat3(&subsetBounds[meshIndex][subsetIndex].max, boundMax);
 		}
 	}
 	
 	 return true;
 }
 
-void Object::Update()
+Object::Bound XM_CALLCONV TransformBound(DirectX::FXMMATRIX transform, const Object::Bound& bound)
 {
-	for (unsigned int meshIndex = 0; meshIndex < mesh.GetNumMeshes(); ++meshIndex)
-	{
-		for (unsigned int subsetIndex = 0; subsetIndex < mesh.GetNumSubsets(meshIndex); subsetIndex++)
-		{
-			const DirectX::XMFLOAT3 boundsVertices[8] = {
-				DirectX::XMFLOAT3(
-					orgSubsetBounds[meshIndex][subsetIndex].min.x,
-					orgSubsetBounds[meshIndex][subsetIndex].min.y,
-					orgSubsetBounds[meshIndex][subsetIndex].min.z),
-				DirectX::XMFLOAT3(
-					orgSubsetBounds[meshIndex][subsetIndex].max.x,
-					orgSubsetBounds[meshIndex][subsetIndex].min.y,
-					orgSubsetBounds[meshIndex][subsetIndex].min.z),
-				DirectX::XMFLOAT3(
-					orgSubsetBounds[meshIndex][subsetIndex].max.x,
-					orgSubsetBounds[meshIndex][subsetIndex].min.y,
-					orgSubsetBounds[meshIndex][subsetIndex].max.z),
-				DirectX::XMFLOAT3(
-					orgSubsetBounds[meshIndex][subsetIndex].min.x,
-					orgSubsetBounds[meshIndex][subsetIndex].min.y,
-					orgSubsetBounds[meshIndex][subsetIndex].max.z),
-				DirectX::XMFLOAT3(
-					orgSubsetBounds[meshIndex][subsetIndex].min.x,
-					orgSubsetBounds[meshIndex][subsetIndex].max.y,
-					orgSubsetBounds[meshIndex][subsetIndex].min.z),
-				DirectX::XMFLOAT3(
-					orgSubsetBounds[meshIndex][subsetIndex].max.x,
-					orgSubsetBounds[meshIndex][subsetIndex].max.y,
-					orgSubsetBounds[meshIndex][subsetIndex].min.z),
-				DirectX::XMFLOAT3(
-					orgSubsetBounds[meshIndex][subsetIndex].max.x,
-					orgSubsetBounds[meshIndex][subsetIndex].max.y,
-					orgSubsetBounds[meshIndex][subsetIndex].max.z),
-				DirectX::XMFLOAT3(
-					orgSubsetBounds[meshIndex][subsetIndex].min.x,
-					orgSubsetBounds[meshIndex][subsetIndex].max.y,
-					orgSubsetBounds[meshIndex][subsetIndex].max.z)
-			};
+    const DirectX::XMVECTORF32 boundsVertices[8] =
+    {
+        { bound.min.x, bound.min.y, bound.min.z, 0.0f },
+        { bound.max.x, bound.min.y, bound.min.z, 0.0f },
+        { bound.max.x, bound.min.y, bound.max.z, 0.0f },
+        { bound.min.x, bound.min.y, bound.max.z, 0.0f },
+        { bound.min.x, bound.max.y, bound.min.z, 0.0f },
+        { bound.max.x, bound.max.y, bound.min.z, 0.0f },
+        { bound.max.x, bound.max.y, bound.max.z, 0.0f },
+        { bound.min.x, bound.max.y, bound.max.z, 0.0f }
+    };
 
-			DirectX::XMVECTOR min = DirectX::XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
-			DirectX::XMVECTOR max = DirectX::XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX);
-			for (auto& vertex : boundsVertices)
-			{
-				const DirectX::XMVECTOR vert = DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&vertex), tramsform);
-				min = DirectX::XMVectorMin(min, vert);
-				max = DirectX::XMVectorMax(max, vert);
-			}
+    DirectX::XMVECTOR mxMin = DirectX::XMVectorReplicate(FLT_MAX);
+    DirectX::XMVECTOR mxMax = DirectX::XMVectorReplicate(-FLT_MAX);
 
-			DirectX::XMStoreFloat3(&transformedSubsetBounds[meshIndex][subsetIndex].min, min);
-			DirectX::XMStoreFloat3(&transformedSubsetBounds[meshIndex][subsetIndex].max, max);
-		}
-	}
+    for (auto& vertex : boundsVertices)
+    {
+        const DirectX::XMVECTOR transformedVertex = DirectX::XMVector3TransformCoord(vertex, transform);
+        mxMin = DirectX::XMVectorMin(mxMin, transformedVertex);
+        mxMax = DirectX::XMVectorMax(mxMax, transformedVertex);
+    }
+
+    Object::Bound transformedBound;
+    DirectX::XMStoreFloat3(&transformedBound.min, mxMin);
+    DirectX::XMStoreFloat3(&transformedBound.max, mxMax);
+
+    return transformedBound;
 }
 
 void Object::Render(ID3D11DeviceContext* deviceContext, const Frustum& frustum)
@@ -212,9 +183,8 @@ void Object::Render(ID3D11DeviceContext* deviceContext, const Frustum& frustum)
 
 		for (unsigned int subsetIndex = 0; subsetIndex < mesh.GetNumSubsets(meshIndex); subsetIndex++)
 		{
-            if (!frustum.Test(
-                DirectX::XMLoadFloat3(&transformedSubsetBounds[meshIndex][subsetIndex].min),
-                DirectX::XMLoadFloat3(&transformedSubsetBounds[meshIndex][subsetIndex].max)))
+            const Bound bound = TransformBound(transform, subsetBounds[meshIndex][subsetIndex]);
+            if (!frustum.Test(DirectX::XMLoadFloat3(&bound.min), DirectX::XMLoadFloat3(&bound.max)))
                 continue;
 
 			const SDKMESH_SUBSET* subset = mesh.GetSubset(meshIndex, subsetIndex);
