@@ -85,6 +85,9 @@
     <ClCompile Include="source\Light.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="source\AABBox.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\BlendState.h">
@@ -163,6 +166,9 @@
       <Filter>source</Filter>
     </ClInclude>
     <ClInclude Include="source\Light.h">
+      <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source\AABBox.h">
       <Filter>source</Filter>
     </ClInclude>
   </ItemGroup>

@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\AABBox.cpp" />
     <ClCompile Include="source\BlendState.cpp" />
     <ClCompile Include="source\Buffer.cpp" />
     <ClCompile Include="source\ComputeShader.cpp" />
@@ -37,6 +38,7 @@
     <ClCompile Include="source\VertexShader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\AABBox.h" />
     <ClInclude Include="source\BlendState.h" />
     <ClInclude Include="source\Buffer.h" />
     <ClInclude Include="source\ComputeShader.h" />

@@ -149,35 +149,11 @@ void TiledRenderer::InitObjects()
     decorationObject->Create(device, GetDeviceContext(), L"sponza\\sponza_alpha.sdkmesh");
     maskedObjects.push_back(decorationObject);
 
-    sceneBoundMin = DirectX::XMFLOAT3(FLT_MAX, FLT_MAX, FLT_MAX);
-    sceneBoundMax = DirectX::XMFLOAT3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-
-    DirectX::XMFLOAT3 boundMin;
-    DirectX::XMFLOAT3 boundMax;
-
     for (auto& object : opaqueObjects)
-    {
-        object->GetBoundMixMax(boundMin, boundMax);
-
-        DirectX::XMStoreFloat3(&sceneBoundMin,
-                               DirectX::XMVectorMin(DirectX::XMLoadFloat3(&boundMin),
-                               XMLoadFloat3(&sceneBoundMin)));
-        DirectX::XMStoreFloat3(&sceneBoundMax,
-                               DirectX::XMVectorMax(DirectX::XMLoadFloat3(&boundMax),
-                               DirectX::XMLoadFloat3(&sceneBoundMax)));
-    }
+        bound += object->GetBound();
 
     for (auto& object : maskedObjects)
-    {
-        object->GetBoundMixMax(boundMin, boundMax);
-
-        DirectX::XMStoreFloat3(&sceneBoundMin,
-                               DirectX::XMVectorMin(DirectX::XMLoadFloat3(&boundMin),
-                               XMLoadFloat3(&sceneBoundMin)));
-        DirectX::XMStoreFloat3(&sceneBoundMax,
-                               DirectX::XMVectorMax(DirectX::XMLoadFloat3(&boundMax),
-                               DirectX::XMLoadFloat3(&sceneBoundMax)));
-    }
+        bound += object->GetBound();
 }
 
 void TiledRenderer::InitLights()
@@ -206,9 +182,9 @@ void TiledRenderer::InitLights()
         }
         else
         {
-            light.position.x = MathHelper::Lerp(sceneBoundMin.x, sceneBoundMax.x, static_cast<float>(dist(gen)) / 1024.0f);
-            light.position.y = MathHelper::Lerp(sceneBoundMin.y, sceneBoundMax.y, static_cast<float>(dist(gen)) / 1024.0f);
-            light.position.z = MathHelper::Lerp(sceneBoundMin.z, sceneBoundMax.z, static_cast<float>(dist(gen)) / 1024.0f);
+            light.position.x = MathHelper::Lerp(bound.GetMin().x, bound.GetMax().x, static_cast<float>(dist(gen)) / 1024.0f);
+            light.position.y = MathHelper::Lerp(bound.GetMin().y, bound.GetMax().y, static_cast<float>(dist(gen)) / 1024.0f);
+            light.position.z = MathHelper::Lerp(bound.GetMin().z, bound.GetMax().z, static_cast<float>(dist(gen)) / 1024.0f);
             light.radius = MathHelper::Lerp(100.0f, 150.0f, static_cast<float>(dist(gen)) / 1024.0f);
             light.color.x = MathHelper::Lerp(0.15f, 1.0f, static_cast<float>(dist(gen)) / 1024.0f);
             light.color.y = MathHelper::Lerp(0.15f, 1.0f, static_cast<float>(dist(gen)) / 1024.0f);
@@ -249,9 +225,9 @@ void TiledRenderer::InitLights()
         }
         else
         {
-            light.position.x = MathHelper::Lerp(sceneBoundMin.x, sceneBoundMax.x, static_cast<float>(dist(gen)) / 1024.0f);
-            light.position.y = MathHelper::Lerp(sceneBoundMin.y, sceneBoundMax.y, static_cast<float>(dist(gen)) / 1024.0f);
-            light.position.z = MathHelper::Lerp(sceneBoundMin.z, sceneBoundMax.z, static_cast<float>(dist(gen)) / 1024.0f);
+            light.position.x = MathHelper::Lerp(bound.GetMin().x, bound.GetMax().x, static_cast<float>(dist(gen)) / 1024.0f);
+            light.position.y = MathHelper::Lerp(bound.GetMin().y, bound.GetMax().y, static_cast<float>(dist(gen)) / 1024.0f);
+            light.position.z = MathHelper::Lerp(bound.GetMin().z, bound.GetMax().z, static_cast<float>(dist(gen)) / 1024.0f);
             light.radius = MathHelper::Lerp(100.0f, 200.0f, static_cast<float>(dist(gen)) / 1024.0f);
             light.color.x = MathHelper::Lerp(0.15f, 1.0f, static_cast<float>(dist(gen)) / 1024.0f);
             light.color.y = MathHelper::Lerp(0.15f, 1.0f, static_cast<float>(dist(gen)) / 1024.0f);
@@ -336,34 +312,33 @@ TiledRenderer::~TiledRenderer()
 void TiledRenderer::Update(float elapsedTime)
 {
     // move lights
-    static const DirectX::XMVECTORF32 firstTrack[] =
+    const unsigned int numTrackItems = 8;
+    static const DirectX::XMVECTORF32 track[2][numTrackItems] =
     {
-        { -1250.0f, 260.0f, -400.0f, 0.0f },
-        { -1250.0f, 260.0f,  400.0f, 0.0f },
-        {  -450.0f, 260.0f,  400.0f, 0.0f },
-        {   350.0f, 260.0f,  400.0f, 0.0f },
-        {  1150.0f, 260.0f,  400.0f, 0.0f },
-        {  1150.0f, 260.0f, -400.0f, 0.0f },
-        {   350.0f, 260.0f, -400.0f, 0.0f },
-        {  -450.0f, 260.0f, -400.0f, 0.0f },
+        {
+            { -1250.0f, 260.0f, -400.0f, 0.0f },
+            { -1250.0f, 260.0f,  400.0f, 0.0f },
+            {  -450.0f, 260.0f,  400.0f, 0.0f },
+            {   350.0f, 260.0f,  400.0f, 0.0f },
+            {  1150.0f, 260.0f,  400.0f, 0.0f },
+            {  1150.0f, 260.0f, -400.0f, 0.0f },
+            {   350.0f, 260.0f, -400.0f, 0.0f },
+            {  -450.0f, 260.0f, -400.0f, 0.0f }
+        },
+        {
+            { -1250.0f, 650.0f,  400.0f, 0.0f },
+            { -1250.0f, 650.0f, -400.0f, 0.0f },
+            {  -450.0f, 650.0f, -400.0f, 0.0f },
+            {   350.0f, 650.0f, -400.0f, 0.0f },
+            {  1150.0f, 650.0f, -400.0f, 0.0f },
+            {  1150.0f, 650.0f,  400.0f, 0.0f },
+            {   350.0f, 650.0f,  400.0f, 0.0f },
+            {  -450.0f, 650.0f,  400.0f, 0.0f }
+        }
     };
 
-    static const DirectX::XMVECTORF32 secondTrack[] =
-    {
-        { -1250.0f, 650.0f,  400.0f, 0.0f },
-        { -1250.0f, 650.0f, -400.0f, 0.0f },
-        {  -450.0f, 650.0f, -400.0f, 0.0f },
-        {   350.0f, 650.0f, -400.0f, 0.0f },
-        {  1150.0f, 650.0f, -400.0f, 0.0f },
-        {  1150.0f, 650.0f,  400.0f, 0.0f },
-        {   350.0f, 650.0f,  400.0f, 0.0f },
-        {  -450.0f, 650.0f,  400.0f, 0.0f },
-    };
-
-    static const unsigned int numTrackItems = ARRAYSIZE(firstTrack);
-    static float trackSpeedRatio = 0.25;
     static float trackTime = 0.0;
-    trackTime = fmod(trackTime + (elapsedTime * trackSpeedRatio), static_cast<float>(numTrackItems));
+    trackTime = fmod(trackTime + (elapsedTime * 0.25f), static_cast<float>(numTrackItems));
 
     DirectX::XMVECTOR rotation = DirectX::XMQuaternionRotationRollPitchYaw(0.0f, elapsedTime * 0.5f, 0.0f);
 
@@ -385,12 +360,14 @@ void TiledRenderer::Update(float elapsedTime)
     {
         if (index < ShadowDepthBuffer::NumMaxSpotLightShadows)
         {
-            unsigned int first = static_cast<unsigned int>(trackTime + index);
-            first = first % numTrackItems;
-            unsigned int second = (first + 1) % numTrackItems;
+            unsigned int currItem = static_cast<unsigned int>(trackTime + index);
+            currItem = currItem % numTrackItems;
+            unsigned int nextItem = (currItem + 1) % numTrackItems;
 
-            const DirectX::XMVECTORF32* track = (index % 2) ? firstTrack : secondTrack;
-            DirectX::XMVECTOR position = DirectX::XMVectorLerp(track[first], track[second], trackTime - floor(trackTime));
+            const size_t trackIndex = (index % 2) ? 0 : 1;
+            const DirectX::XMVECTOR position = DirectX::XMVectorLerp(track[trackIndex][currItem],
+                track[trackIndex][nextItem],
+                trackTime - floor(trackTime));
 
             DirectX::XMStoreFloat3(&spotLights[index].position, position);
             spotLights[index].direction = spotLights[index].position;

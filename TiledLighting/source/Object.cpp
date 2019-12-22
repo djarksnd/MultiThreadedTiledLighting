@@ -103,53 +103,23 @@ bool Object::Create(ID3D11Device* device, ID3D11DeviceContext* ImmediateContext,
 			const unsigned int IndexStart = static_cast<unsigned int>(subset->IndexStart);
 			const unsigned int VertexStart = static_cast<unsigned int>(subset->VertexStart);
 
-            DirectX::XMVECTOR boundMin = DirectX::XMVectorReplicate(FLT_MAX);
-            DirectX::XMVECTOR boundMax = DirectX::XMVectorReplicate(-FLT_MAX);
-
 			for (unsigned int i = IndexStart; i < IndexStart + IndexCount; ++i)
 			{
 				const DirectX::XMVECTOR vertex = DirectX::XMLoadFloat3(&vertices[indices[i] + VertexStart]);
-				boundMin = DirectX::XMVectorMin(boundMin, vertex);
-				boundMax = DirectX::XMVectorMax(boundMax, vertex);
+                subsetBounds[meshIndex][subsetIndex].AddPoint(vertex);
 			}
-
-			DirectX::XMStoreFloat3(&subsetBounds[meshIndex][subsetIndex].min, boundMin);
-			DirectX::XMStoreFloat3(&subsetBounds[meshIndex][subsetIndex].max, boundMax);
 		}
 	}
-	
-	 return true;
-}
 
-Object::Bound XM_CALLCONV TransformBound(DirectX::FXMMATRIX transform, const Object::Bound& bound)
-{
-    const DirectX::XMVECTORF32 boundsVertices[8] =
+    for (unsigned int i = 0; i < mesh.GetNumMeshes(); i++)
     {
-        { bound.min.x, bound.min.y, bound.min.z, 0.0f },
-        { bound.max.x, bound.min.y, bound.min.z, 0.0f },
-        { bound.max.x, bound.min.y, bound.max.z, 0.0f },
-        { bound.min.x, bound.min.y, bound.max.z, 0.0f },
-        { bound.min.x, bound.max.y, bound.min.z, 0.0f },
-        { bound.max.x, bound.max.y, bound.min.z, 0.0f },
-        { bound.max.x, bound.max.y, bound.max.z, 0.0f },
-        { bound.min.x, bound.max.y, bound.max.z, 0.0f }
-    };
+        DirectX::XMVECTOR  min = DirectX::XMVectorSubtract(mesh.GetMeshBBoxCenter(i), mesh.GetMeshBBoxExtents(i));
+        DirectX::XMVECTOR  max = DirectX::XMVectorAdd(mesh.GetMeshBBoxCenter(i), mesh.GetMeshBBoxExtents(i));
 
-    DirectX::XMVECTOR mxMin = DirectX::XMVectorReplicate(FLT_MAX);
-    DirectX::XMVECTOR mxMax = DirectX::XMVectorReplicate(-FLT_MAX);
-
-    for (auto& vertex : boundsVertices)
-    {
-        const DirectX::XMVECTOR transformedVertex = DirectX::XMVector3TransformCoord(vertex, transform);
-        mxMin = DirectX::XMVectorMin(mxMin, transformedVertex);
-        mxMax = DirectX::XMVectorMax(mxMax, transformedVertex);
+        bound.AddMinMaxPoint(min, max);
     }
 
-    Object::Bound transformedBound;
-    DirectX::XMStoreFloat3(&transformedBound.min, mxMin);
-    DirectX::XMStoreFloat3(&transformedBound.max, mxMax);
-
-    return transformedBound;
+	 return true;
 }
 
 void Object::Render(ID3D11DeviceContext* deviceContext, const Frustum& frustum)
@@ -183,8 +153,10 @@ void Object::Render(ID3D11DeviceContext* deviceContext, const Frustum& frustum)
 
 		for (unsigned int subsetIndex = 0; subsetIndex < mesh.GetNumSubsets(meshIndex); subsetIndex++)
 		{
-            const Bound bound = TransformBound(transform, subsetBounds[meshIndex][subsetIndex]);
-            if (!frustum.Test(DirectX::XMLoadFloat3(&bound.min), DirectX::XMLoadFloat3(&bound.max)))
+            AABBox transformedBound = subsetBounds[meshIndex][subsetIndex];
+            transformedBound.Transform(transform);
+            if (!frustum.Test(DirectX::XMLoadFloat3(&transformedBound.GetMin()),
+                DirectX::XMLoadFloat3(&transformedBound.GetMax())))
                 continue;
 
 			const SDKMESH_SUBSET* subset = mesh.GetSubset(meshIndex, subsetIndex);
@@ -207,19 +179,4 @@ void Object::Render(ID3D11DeviceContext* deviceContext, const Frustum& frustum)
 			deviceContext->DrawIndexed(IndexCount, IndexStart, VertexStart);
 		}
 	}
-}
-
-void Object::GetBoundMixMax(DirectX::XMFLOAT3& outMin, DirectX::XMFLOAT3& outMax) const
-{
-	DirectX::XMVECTOR min = DirectX::XMVectorSubtract(mesh.GetMeshBBoxCenter(0), mesh.GetMeshBBoxExtents(0));
-	DirectX::XMVECTOR max = DirectX::XMVectorAdd(mesh.GetMeshBBoxCenter(0), mesh.GetMeshBBoxExtents(0));
-
-	for (unsigned int i = 1; i < mesh.GetNumMeshes(); i++)
-	{
-		min = DirectX::XMVectorMin(min, DirectX::XMVectorSubtract(mesh.GetMeshBBoxCenter(i), mesh.GetMeshBBoxExtents(i)));
-		max = DirectX::XMVectorMax(max, DirectX::XMVectorAdd(mesh.GetMeshBBoxCenter(i), mesh.GetMeshBBoxExtents(i)));
-	}
-
-	DirectX::XMStoreFloat3(&outMin, min);
-	DirectX::XMStoreFloat3(&outMax, max);
 }

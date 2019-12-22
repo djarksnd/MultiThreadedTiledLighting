@@ -6,7 +6,7 @@
 class Frustum
 {
 public:
-	Frustum() {}
+    Frustum();
 	Frustum(DirectX::FXMMATRIX invViewProjectionMatrix);
 	Frustum(DirectX::FXMVECTOR aabMin, DirectX::FXMVECTOR aabMax);
 	bool XM_CALLCONV Test(DirectX::FXMVECTOR position, float radius) const;

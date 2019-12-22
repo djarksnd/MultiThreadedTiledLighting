@@ -7,27 +7,19 @@
 #include "..\\..\\DXUT\\Core\\DXUT.h"
 #include "..\\..\\DXUT\\Optional\\SDKmesh.h"
 
+#include "AABBox.h"
+
 class Frustum;
 
 class Object
 {
 public:
-	struct Bound
-	{
-		DirectX::XMFLOAT3 min;
-		DirectX::XMFLOAT3 max;
-	};
-
-public:
 	Object() : transform(DirectX::XMMatrixIdentity()) {}
-	~Object() {
-		mesh.Destroy();
-	}
+	~Object() { mesh.Destroy(); }
 
 	bool Create(ID3D11Device* device, ID3D11DeviceContext* ImmediateContext, const std::wstring& fileName);
 	void Render(ID3D11DeviceContext* deviceContext, const Frustum& frustum);
 
-	void GetBoundMixMax(DirectX::XMFLOAT3& outMin, DirectX::XMFLOAT3& outMax) const;
 	void XM_CALLCONV SetTransform(DirectX::FXMMATRIX argTransform) {
 		transform = argTransform;
 	}
@@ -37,6 +29,9 @@ public:
 	const CDXUTSDKMesh& GetMesh() const {
 		return mesh;
 	}
+    const AABBox& GetBound() const {
+        return bound;
+    }
 
 	Object(const Object&) = delete;
 	const Object& operator = (const Object&) = delete;
@@ -44,5 +39,6 @@ public:
 private:
 	CDXUTSDKMesh mesh;
 	DirectX::XMMATRIX transform;
-	std::vector<std::vector<Bound>> subsetBounds;
+    AABBox bound;
+	std::vector<std::vector<AABBox>> subsetBounds;
 };

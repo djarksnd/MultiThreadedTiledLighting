@@ -50,7 +50,7 @@ DirectX::XMMATRIX ComputeSpotLightShadowMatrix(const SpotLight& light)
 	const DirectX::XMVECTOR lightPosition = DirectX::XMLoadFloat3(&light.position);
 	const DirectX::XMVECTOR lookAt = DirectX::XMVectorAdd(lightPosition, DirectX::XMLoadFloat3(&light.direction));
 	const DirectX::XMVECTOR up = (light.direction.y < 0.9f && light.direction.y > -0.9f) ?
-        DirectX::XMVECTORF32{ 0.0f, 1.0f, 0.0f, 0.0f } : DirectX::XMVECTORF32{ 0.0f, 0.0f, 1.0f, 0.0f };
+        DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f) : DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 
 	const float fovY = acosf(light.cosHalfAngle) * 2.0f;
 

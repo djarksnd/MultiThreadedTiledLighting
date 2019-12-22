@@ -137,7 +137,7 @@ void RenderGUI(float elapsedTime)
 
     g_textHelper->Begin();
     g_textHelper->SetInsertionPos(5, 5);
-    g_textHelper->SetForegroundColor(DirectX::XMVECTORF32{ 1.0f, 1.0f, 0.0f, 1.0f });
+    g_textHelper->SetForegroundColor(DirectX::XMVectorSet(1.0f, 1.0f, 0.0f, 1.0f));
     g_textHelper->DrawTextLine(DXUTGetFrameStats(DXUTIsVsyncEnabled()));
     g_textHelper->DrawTextLine(DXUTGetDeviceStats());
     g_textHelper->End();
@@ -165,8 +165,8 @@ HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFAC
                            pBackBufferSurfaceDesc->SampleDesc.Count);
 
         using namespace DirectX;
-        const XMVECTOR SceneMin = DirectX::XMLoadFloat3(&g_renderer->GetSceneBoundMin());
-        const XMVECTOR SceneMax = DirectX::XMLoadFloat3(&g_renderer->GetSceneBoundMax());
+        const XMVECTOR SceneMin = DirectX::XMLoadFloat3(&g_renderer->GetBound().GetMin());
+        const XMVECTOR SceneMax = DirectX::XMLoadFloat3(&g_renderer->GetBound().GetMax());
 
         XMVECTOR SceneCenter = 0.5f * (SceneMax + SceneMin);
         XMVECTOR SceneExtents = 0.5f * (SceneMax - SceneMin);

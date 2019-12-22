@@ -20,6 +20,7 @@
 #include "PixelShader.h"
 #include "ShadowDepthBuffer.h"
 #include "Light.h"
+#include "AABBox.h"
 
 class CBaseCamera;
 
@@ -156,11 +157,8 @@ public:
     const ViewInfo& GetViewInfo() const {
         return viewInfo;
     }
-    const DirectX::XMFLOAT3& GetSceneBoundMin() const {
-        return sceneBoundMin;
-    }
-    const DirectX::XMFLOAT3& GetSceneBoundMax() const {
-        return sceneBoundMax;
+    const AABBox& GetBound() const {
+        return bound;
     }
     void SetNumPointLightShadowLimit(size_t num) {
         shadowDepthBuffer.SetNumPointLightShadowLimit(num);
@@ -178,8 +176,6 @@ private:
     static void RenderingThreadProc(RenderingThread& argThread, TiledRenderer& renderer);
 
 private:
-    DirectX::XMFLOAT3 sceneBoundMin;
-    DirectX::XMFLOAT3 sceneBoundMax;
     ID3D11Device* device = nullptr;
     ID3D11DeviceContext* immediateContext;
     unsigned int screenWidth = 0;
@@ -204,6 +200,7 @@ private:
     size_t numPointLightLimit = NumMaxPointLights / 2;
     size_t numSpotLightLimit = NumMaxSpotLights / 2;
     ViewInfo viewInfo;
+    AABBox bound;
 
     mutable std::vector<RenderingTask> renderingTasks;
     std::vector<RenderingThread> threads;

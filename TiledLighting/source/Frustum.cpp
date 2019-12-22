@@ -1,20 +1,30 @@
 #include "Frustum.h"
 
+Frustum::Frustum()
+{
+    planes[0] = DirectX::XMVectorZero();
+    planes[1] = DirectX::XMVectorZero();
+    planes[2] = DirectX::XMVectorZero();
+    planes[3] = DirectX::XMVectorZero();
+    planes[4] = DirectX::XMVectorZero();
+    planes[5] = DirectX::XMVectorZero();
+}
+
 Frustum::Frustum(DirectX::FXMMATRIX invViewProjectionMatrix)
 {
 	const DirectX::XMVECTOR vertices[8] =
 	{
-		// front
-        DirectX::XMVector3TransformCoord(DirectX::XMVECTORF32{-1.0f,  1.0f, 1.0f, 0.0f}, invViewProjectionMatrix),
-        DirectX::XMVector3TransformCoord(DirectX::XMVECTORF32{1.0f,  1.0f, 1.0f, 0.0f}, invViewProjectionMatrix),
-        DirectX::XMVector3TransformCoord(DirectX::XMVECTORF32{1.0f, -1.0f, 1.0f, 0.0f}, invViewProjectionMatrix),
-        DirectX::XMVector3TransformCoord(DirectX::XMVECTORF32{-1.0f, -1.0f, 1.0f, 0.0f}, invViewProjectionMatrix),
+        // front
+        DirectX::XMVector3TransformCoord(DirectX::XMVectorSet(-1.0f,  1.0f, 1.0f, 0.0f), invViewProjectionMatrix),
+        DirectX::XMVector3TransformCoord(DirectX::XMVectorSet(1.0f,  1.0f, 1.0f, 0.0f), invViewProjectionMatrix),
+        DirectX::XMVector3TransformCoord(DirectX::XMVectorSet(1.0f, -1.0f, 1.0f, 0.0f), invViewProjectionMatrix),
+        DirectX::XMVector3TransformCoord(DirectX::XMVectorSet(-1.0f, -1.0f, 1.0f, 0.0f), invViewProjectionMatrix),
 
-		// back
-        DirectX::XMVector3TransformCoord(DirectX::XMVECTORF32{-1.0f,  1.0f, 0.0f, 0.0f}, invViewProjectionMatrix),
-        DirectX::XMVector3TransformCoord(DirectX::XMVECTORF32{1.0f,  1.0f, 0.0f, 0.0f}, invViewProjectionMatrix),
-        DirectX::XMVector3TransformCoord(DirectX::XMVECTORF32{1.0f, -1.0f, 0.0f, 0.0f}, invViewProjectionMatrix),
-        DirectX::XMVector3TransformCoord(DirectX::XMVECTORF32{-1.0f, -1.0f, 0.0f, 0.0f}, invViewProjectionMatrix)
+        // back
+        DirectX::XMVector3TransformCoord(DirectX::XMVectorSet(-1.0f,  1.0f, 0.0f, 0.0f), invViewProjectionMatrix),
+        DirectX::XMVector3TransformCoord(DirectX::XMVectorSet(1.0f,  1.0f, 0.0f, 0.0f), invViewProjectionMatrix),
+        DirectX::XMVector3TransformCoord(DirectX::XMVectorSet(1.0f, -1.0f, 0.0f, 0.0f), invViewProjectionMatrix),
+        DirectX::XMVector3TransformCoord(DirectX::XMVectorSet(-1.0f, -1.0f, 0.0f, 0.0f), invViewProjectionMatrix)
 	};
 
 	planes[0] = DirectX::XMPlaneFromPoints(vertices[1], vertices[0], vertices[2]); // front
