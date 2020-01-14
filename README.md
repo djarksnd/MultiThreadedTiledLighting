@@ -1,2 +1,2 @@
 # TiledDeferredLighting
-portfolio for SDS
+D3DX11 Portfolio
