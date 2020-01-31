@@ -4,8 +4,6 @@
 #include <DirectXMath.h>
 #include <functional>
 #include <thread>
-#include <condition_variable>
-#include <mutex>
 #include <shared_mutex>
 #include <atomic>
 #include <vector>
