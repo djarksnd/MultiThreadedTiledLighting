@@ -117,6 +117,7 @@ bool GeometryPass::Resize(const TiledRenderer& renderer)
 
 void GeometryPass::Render(const TiledRenderer& renderer)
 {
+    // drawing geometry buffer.
 	renderer.PostRenderTask([this, &renderer]() {
 		ID3D11DeviceContext* deviceContext = renderer.GetDeviceContext();
 
@@ -151,6 +152,7 @@ void GeometryPass::Render(const TiledRenderer& renderer)
 
 		const Frustum frustum(renderer.GetViewInfo().invViewProjectionMatrix);
 
+        // drawing opaque objects geometries.
 		deviceContext->PSSetShader(opaquePixelShader, nullptr, 0);
 		for (auto& object : renderer.GetOpaqueObjects())
 		{
@@ -162,6 +164,7 @@ void GeometryPass::Render(const TiledRenderer& renderer)
 			object->Render(deviceContext, frustum);
 		}
 
+        // drawing masked objects geometries.
 		deviceContext->PSSetShader(maskedPixelShader, nullptr, 0);
 		for (auto& object : renderer.GetMaskedObjects())
 		{
@@ -175,6 +178,7 @@ void GeometryPass::Render(const TiledRenderer& renderer)
 
 		if (!renderer.GetEnableMultiThreadedRendering())
 		{
+            // restore d3d rendering states if not multi threaded rendering mode for next drawing steps.
 			for (auto& rtv : rtvs)
 				rtv = nullptr;
 

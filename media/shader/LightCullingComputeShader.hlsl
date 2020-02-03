@@ -152,7 +152,7 @@ void main(in uint3 dispatchThreadID : SV_DispatchThreadID,
 {
 	if (groupIndex == 0)
 	{
-		minDepth = 0x7f7fffff;  // FLT_MAX as a uint;
+		minDepth = 0x7f7fffff;  // FLT_MAX as a uint
 		maxDepth = 0;
 		pointLightCounter[0] = 0;
 		pointLightCounter[1] = 0;

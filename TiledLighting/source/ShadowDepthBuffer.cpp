@@ -222,6 +222,7 @@ void ShadowDepthBuffer::RenderPointLightShadowDepth(const TiledRenderer& rendere
 
 	if (!renderer.GetEnableMultiThreadedRendering())
 	{
+        // restore d3d rendering states if not multi threaded rendering mode for next drawing steps.
 		ID3D11DeviceContext* deviceContext = renderer.GetDeviceContext();
 		deviceContext->VSSetShader(nullptr, nullptr, 0);
 		deviceContext->GSSetShader(nullptr, nullptr, 0);
@@ -308,6 +309,7 @@ void ShadowDepthBuffer::RenderSpotLightShadowDepth(const TiledRenderer& renderer
 
 	if (!renderer.GetEnableMultiThreadedRendering())
 	{
+        // restore d3d rendering states if not multi threaded rendering mode for next drawing steps.
 		ID3D11DeviceContext* deviceContext = renderer.GetDeviceContext();
 		deviceContext->VSSetShader(nullptr, nullptr, 0);
 		deviceContext->PSSetShader(nullptr, nullptr, 0);

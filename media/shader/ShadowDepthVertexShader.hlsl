@@ -11,6 +11,11 @@ struct VS_OUTPUT
 	float4 position : SV_Position;
 	float2 texCoord : TEXCOORD0;
 #if SpotLight
+	// Shadow depth are stored texture array.
+	// So renderTargetIndex is used as the texture array index.
+
+	// The render target index of the point light is calculated in the geometry shader for one - pass drawing.
+	// See ShadowDepthGeometryShader.hlsl for more information.
 	uint renderTargetIndex : SV_RenderTargetArrayIndex;
 #endif
 };
@@ -35,6 +40,11 @@ VS_OUTPUT main(VS_INPUT input)
 	output.texCoord = input.texCoord;
 
 #if SpotLight
+	// Shadow depth are stored texture array.
+	// So renderTargetIndex is used as the texture array index.
+
+	// The render target index of the point light is calculated in the geometry shader for one - pass drawing.
+	// See ShadowDepthGeometryShader.hlsl for more information.
 	output.position = mul(output.position, shadowMatrix);
 	output.renderTargetIndex = renderTargetIndex;
 #endif

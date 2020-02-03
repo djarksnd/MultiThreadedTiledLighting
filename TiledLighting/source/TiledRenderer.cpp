@@ -455,16 +455,25 @@ void TiledRenderer::Render(const CBaseCamera& camera)
     viewInfo.invViewProjectionMatrix = DirectX::XMMatrixInverse(nullptr, viewInfo.viewProjectionMatrix);
     viewInfo.viewOrigin = camera.GetEyePt();
 
+    // Clear scene color buffer and scene depth buffer.
     float clearColor[4] = { 0.0f };
     sceneRenderTarget.Clear(GetDeviceContext(), clearColor);
     sceneDepthStencilBuffer.Clear(GetDeviceContext(), 0.0f, 0);
 
+    // Write geometry of objects to geometry buffer.
     geometryPass.Render(*this);
+
+    // Draw shadow depth before performing drawing lights.
     shadowDepthBuffer.Render(*this);
+
+    // Draw lights using geometry buffers and shadow depth buffer.
+    // This function also uses the compute shader to culling the lights before drawing them.
     lightPass.Render(*this);
 
+    // Perform a gamma operation and print the sceneColor to the back buffer.
     RenderPostprocess();
 
+    // Run registered rendering tasks using multithreading and wait for all rendering tests to complete.
     FlushRenderTasks();
 }
 
@@ -474,10 +483,13 @@ void TiledRenderer::FlushRenderTasks()
         return;
 
     taskIndex.store(0);
+
+    // Release the mutex lock so that the rendering task threads can run.
     mutexLock.unlock();
 
     while (true)
     {
+        // Yields main thread CPU resources so that rendering task threads can be allocated CPU resources.
         std::this_thread::yield();
         mutexLock.lock();
 
@@ -487,6 +499,7 @@ void TiledRenderer::FlushRenderTasks()
             break;
     }
 
+    // Execute the recorded command list after all rendering tasks are completed.
     for (auto& task : renderingTasks)
     {
         if (task.commandList)
@@ -503,7 +516,10 @@ void TiledRenderer::RenderingThreadProc(RenderingThread& thread, TiledRenderer& 
 {
     while (thread.execution)
     {
+        // After the task is completed, yield CPU resources so that the main thread does not starve.
         std::this_thread::yield();
+
+        // Wait for the mutex lock to be released on the main thread.
         std::shared_lock<std::shared_mutex> sharedLock(renderer.sharedMutex);
 
         while (true)
@@ -512,6 +528,8 @@ void TiledRenderer::RenderingThreadProc(RenderingThread& thread, TiledRenderer& 
             if (taskIndex < renderer.renderingTasks.size())
             {
                 RenderingTask& task = renderer.renderingTasks[taskIndex];
+
+                // Run task and Record command list of rendering tasks.
                 task.task();
                 renderer.GetDeviceContext()->FinishCommandList(false, &task.commandList);
             }
@@ -521,6 +539,4 @@ void TiledRenderer::RenderingThreadProc(RenderingThread& thread, TiledRenderer& 
             }
         }
     }
-
-    std::this_thread::yield();
 }

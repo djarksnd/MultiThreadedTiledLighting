@@ -26,7 +26,9 @@ public:
 	const LightPass& operator = (const LightPass&) = delete;
 
 private:
+    // Lights culling with compute shader and screen align tile's frustums.
 	void CullLights(const TiledRenderer& renderer);
+    // Calculate lighting with gbuffers and gpu lights culling results to scene color buffer.
 	void RenderLights(const TiledRenderer& renderer);
 
 	static constexpr unsigned int NumMaxPointLightsPerTile = 128;
