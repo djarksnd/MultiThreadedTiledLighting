@@ -50,16 +50,16 @@ public:
 private:
     struct RenderingThread
     {
+        ID3D11DeviceContext* deferredContext = nullptr;
         std::thread thread;
         std::thread::id id;
         bool execution = false;
-        ID3D11DeviceContext* deferredContext = nullptr;
     };
 
     struct RenderingTask
     {
-        std::function<void()> task;
         ID3D11CommandList* commandList;
+        std::function<void()> task;
     };
 
 public:
@@ -155,8 +155,8 @@ public:
     const ViewInfo& GetViewInfo() const {
         return viewInfo;
     }
-    const AABBox& GetBound() const {
-        return bound;
+    const AABBox& GetSceneBound() const {
+        return sceneBound;
     }
     void SetNumPointLightShadowLimit(size_t num) {
         shadowDepthBuffer.SetNumPointLightShadowLimit(num);
@@ -183,11 +183,9 @@ private:
     bool visualizeNumLights = false;
     RenderTarget sceneRenderTarget;
     DepthStencilBuffer sceneDepthStencilBuffer;
-
     GeometryPass geometryPass;
     ShadowDepthBuffer shadowDepthBuffer;
     LightPass lightPass;
-
     PixelShader postprocessPixelShader;
     ConstantBuffer postprocessCBuffer;
     ScreenAlignQuad screenAlignQuad;
@@ -198,13 +196,11 @@ private:
     size_t numPointLightLimit = NumMaxPointLights / 2;
     size_t numSpotLightLimit = NumMaxSpotLights / 2;
     ViewInfo viewInfo;
-    AABBox bound;
-
+    AABBox sceneBound;
     mutable std::vector<RenderingTask> renderingTasks;
     std::vector<RenderingThread> threads;
     std::shared_mutex sharedMutex;
     std::unique_lock<std::shared_mutex> mutexLock;
     std::atomic_int taskIndex;
-
     bool enableMultiThreadedRendering = true;
 };

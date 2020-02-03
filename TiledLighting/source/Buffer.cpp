@@ -1,8 +1,7 @@
 #include <assert.h>
 #include "Buffer.h"
 
-bool
-Buffer::Create(ID3D11Device* device, DXGI_FORMAT format,
+bool Buffer::Create(ID3D11Device* device, DXGI_FORMAT format,
 			   unsigned int argBufferSize, unsigned int elementSize, 
 			   const ResourceBindFlags& bindFlags,
 			   const ResourceCPUAccessFlags& cpuAccessFlags, 
@@ -87,8 +86,7 @@ Buffer::Create(ID3D11Device* device, DXGI_FORMAT format,
 }
 
 
-void
-Buffer::Destroy()
+void Buffer::Destroy()
 {
 	if (buff)
 	{
@@ -110,14 +108,11 @@ Buffer::Destroy()
 	}
 }
 
-bool
-Buffer::Update(ID3D11DeviceContext* deviceContext, const void* const data, unsigned int updateBytes) const
+bool Buffer::Update(ID3D11DeviceContext* deviceContext, const void* const data, unsigned int updateBytes) const
 {
 	assert(data);
-	if (nullptr == data)
-	{
-		return false;
-	}
+    if (nullptr == data)
+        return false;
 
 	if (updateBytes == 0)
 		updateBytes = bufferSize;

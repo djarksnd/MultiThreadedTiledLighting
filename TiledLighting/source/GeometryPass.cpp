@@ -4,6 +4,8 @@
 #include "Object.h"
 #include "DepthStencilBuffer.h"
 
+
+
 bool GeometryPass::Create(const TiledRenderer& renderer)
 {
 	if (!Resize(renderer))

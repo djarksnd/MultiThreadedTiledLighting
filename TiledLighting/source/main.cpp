@@ -29,12 +29,12 @@ enum IDC
     IDC_GammaSlide,
 };
 
-CDXUTDialogResourceManager g_dialogResourceManager;
-CDXUTDialog g_HUD;
-std::shared_ptr<CDXUTTextHelper> g_textHelper;
-std::shared_ptr<TiledRenderer> g_renderer;
-CFirstPersonCamera g_camera;
-float g_maxSceneDistance = 500.0f;
+CDXUTDialogResourceManager dialogResourceManager;
+CDXUTDialog hud;
+std::shared_ptr<CDXUTTextHelper> textHelper;
+std::shared_ptr<TiledRenderer> tiledRenderer;
+CFirstPersonCamera camera;
+float maxSceneDistance = 500.0f;
 
 LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, bool* pbNoFurtherProcessing, void* pUserContext);
 void CALLBACK OnGUIEvent(UINT nEvent, int nControlID, CDXUTControl* pControl, void* pUserContext);
@@ -82,37 +82,37 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 void InitializeGUI()
 {
     D3DCOLOR DlgColor = 0x88888888;
-    g_HUD.Init(&g_dialogResourceManager);
-    g_HUD.SetBackgroundColors(DlgColor);
+    hud.Init(&dialogResourceManager);
+    hud.SetBackgroundColors(DlgColor);
 
-    g_HUD.SetCallback(OnGUIEvent);
+    hud.SetCallback(OnGUIEvent);
     int iY = 10;
-    g_HUD.AddButton(IDC_TOGGLEFULLSCREEN, L"Toggle full screen", 70, iY, 125, 22);
+    hud.AddButton(IDC_TOGGLEFULLSCREEN, L"Toggle full screen", 70, iY, 125, 22);
 
-    g_HUD.AddStatic(IDC_NumPointLight, L"NumPointLights :", 40, iY += 30, 125, 22);
-    g_HUD.AddSlider(IDC_NumPointLightSlide, 25, iY += 24, 200, 22, 0,
+    hud.AddStatic(IDC_NumPointLight, L"NumPointLights :", 40, iY += 30, 125, 22);
+    hud.AddSlider(IDC_NumPointLightSlide, 25, iY += 24, 200, 22, 0,
                          TiledRenderer::NumMaxPointLights, 0);
 
-    g_HUD.AddStatic(IDC_NumSpotLight, L"NumSpotLight :", 40, iY += 24, 125, 22);
-    g_HUD.AddSlider(IDC_NumSpotLightSlide, 25, iY += 24, 200, 22, 0,
+    hud.AddStatic(IDC_NumSpotLight, L"NumSpotLight :", 40, iY += 24, 125, 22);
+    hud.AddSlider(IDC_NumSpotLightSlide, 25, iY += 24, 200, 22, 0,
                          TiledRenderer::NumMaxSpotLights, 0);
 
-    g_HUD.AddStatic(IDC_NumPointLightShadow, L"NumPointLightShadow :", 40, iY += 24, 125, 22);
-    g_HUD.AddSlider(IDC_NumPointLightShadowSlide, 25, iY += 24, 200, 22, 0,
+    hud.AddStatic(IDC_NumPointLightShadow, L"NumPointLightShadow :", 40, iY += 24, 125, 22);
+    hud.AddSlider(IDC_NumPointLightShadowSlide, 25, iY += 24, 200, 22, 0,
                          ShadowDepthBuffer::NumMaxPointLightShadows, 0);
 
-    g_HUD.AddStatic(IDC_NumSpotLightShadow, L"NumSpotLightShadow :", 40, iY += 24, 125, 22);
-    g_HUD.AddSlider(IDC_NumSpotLightShadowSlide, 25, iY += 24, 200, 22, 0,
+    hud.AddStatic(IDC_NumSpotLightShadow, L"NumSpotLightShadow :", 40, iY += 24, 125, 22);
+    hud.AddSlider(IDC_NumSpotLightShadowSlide, 25, iY += 24, 200, 22, 0,
                          ShadowDepthBuffer::NumMaxSpotLightShadows, 0);
 
     iY += 24;
-    g_HUD.AddCheckBox(IDC_MultiThreadedRendering, L"MultiThreadedRendering", 20, iY += 24, 200, 22, false);
+    hud.AddCheckBox(IDC_MultiThreadedRendering, L"MultiThreadedRendering", 20, iY += 24, 200, 22, false);
 
     iY += 24;
-    g_HUD.AddCheckBox(IDC_VisualizeNumLights, L"VisualizeNumLightsPerTile", 20, iY += 24, 200, 22, false);
+    hud.AddCheckBox(IDC_VisualizeNumLights, L"VisualizeNumLightsPerTile", 20, iY += 24, 200, 22, false);
 
-    g_HUD.AddStatic(IDC_Gamma, L"Gamma :", 40, iY += 40, 125, 22);
-    g_HUD.AddSlider(IDC_GammaSlide, 25, iY += 24, 200, 22, 0, 50, 0);
+    hud.AddStatic(IDC_Gamma, L"Gamma :", 40, iY += 40, 125, 22);
+    hud.AddSlider(IDC_GammaSlide, 25, iY += 24, 200, 22, 0, 50, 0);
 
     UpdateGUI();
 }
@@ -126,21 +126,21 @@ void RenderGUI(float elapsedTime)
     D3D11_VIEWPORT viewPort;
     viewPort.TopLeftX = 0;
     viewPort.TopLeftY = 0;
-    viewPort.Width = static_cast<float>(g_renderer->GetScreenWidth());
-    viewPort.Height = static_cast<float>(g_renderer->GetScreenHeight());
+    viewPort.Width = static_cast<float>(tiledRenderer->GetScreenWidth());
+    viewPort.Height = static_cast<float>(tiledRenderer->GetScreenHeight());
     viewPort.MinDepth = 0.0f;
     viewPort.MaxDepth = 1.0f;
     deviceContext->RSSetViewports(1, &viewPort);
 
     deviceContext->OMSetRenderTargets(1, &renderTargetView, nullptr);
-    g_HUD.OnRender(elapsedTime);
+    hud.OnRender(elapsedTime);
 
-    g_textHelper->Begin();
-    g_textHelper->SetInsertionPos(5, 5);
-    g_textHelper->SetForegroundColor(DirectX::XMVectorSet(1.0f, 1.0f, 0.0f, 1.0f));
-    g_textHelper->DrawTextLine(DXUTGetFrameStats(DXUTIsVsyncEnabled()));
-    g_textHelper->DrawTextLine(DXUTGetDeviceStats());
-    g_textHelper->End();
+    textHelper->Begin();
+    textHelper->SetInsertionPos(5, 5);
+    textHelper->SetForegroundColor(DirectX::XMVectorSet(1.0f, 1.0f, 0.0f, 1.0f));
+    textHelper->DrawTextLine(DXUTGetFrameStats(DXUTIsVsyncEnabled()));
+    textHelper->DrawTextLine(DXUTGetDeviceStats());
+    textHelper->End();
 }
 
 HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFACE_DESC* pBackBufferSurfaceDesc,
@@ -149,41 +149,42 @@ HRESULT CALLBACK OnD3D11CreateDevice(ID3D11Device* pd3dDevice, const DXGI_SURFAC
     HRESULT hr;
 
     ID3D11DeviceContext* pd3dImmediateContext = DXUTGetD3D11DeviceContext();
-    V_RETURN(g_dialogResourceManager.OnD3D11CreateDevice(pd3dDevice, pd3dImmediateContext));
-    g_textHelper = std::shared_ptr<CDXUTTextHelper>(
-        new CDXUTTextHelper(pd3dDevice, pd3dImmediateContext, &g_dialogResourceManager, 15));
+    V_RETURN(dialogResourceManager.OnD3D11CreateDevice(pd3dDevice, pd3dImmediateContext));
+    textHelper = std::shared_ptr<CDXUTTextHelper>(
+        new CDXUTTextHelper(pd3dDevice, pd3dImmediateContext, &dialogResourceManager, 15));
 
-    g_renderer = std::shared_ptr<TiledRenderer>(new TiledRenderer);
-    if (g_renderer)
+    tiledRenderer = std::shared_ptr<TiledRenderer>(new TiledRenderer);
+    if (tiledRenderer)
     {
         ID3D11DeviceContext* pd3dImmediateContext = DXUTGetD3D11DeviceContext();
 
-        g_renderer->Create(pd3dDevice,
+        tiledRenderer->Create(pd3dDevice,
                            pd3dImmediateContext,
                            pBackBufferSurfaceDesc->Width,
                            pBackBufferSurfaceDesc->Height,
                            pBackBufferSurfaceDesc->SampleDesc.Count);
 
         using namespace DirectX;
-        const XMVECTOR SceneMin = DirectX::XMLoadFloat3(&g_renderer->GetBound().GetMin());
-        const XMVECTOR SceneMax = DirectX::XMLoadFloat3(&g_renderer->GetBound().GetMax());
+        const XMVECTOR sceneMin = DirectX::XMLoadFloat3(&tiledRenderer->GetSceneBound().GetMin());
+        const XMVECTOR sceneMax = DirectX::XMLoadFloat3(&tiledRenderer->GetSceneBound().GetMax());
 
-        XMVECTOR SceneCenter = 0.5f * (SceneMax + SceneMin);
-        XMVECTOR SceneExtents = 0.5f * (SceneMax - SceneMin);
-        XMVECTOR BoundaryMin = SceneCenter - 2.0f*SceneExtents;
-        XMVECTOR BoundaryMax = SceneCenter + 2.0f*SceneExtents;
-        XMVECTOR BoundaryDiff = BoundaryMax - BoundaryMin;
-        g_maxSceneDistance = XMVectorGetX(XMVector3Length(BoundaryDiff));
-        XMVECTOR vEye = SceneCenter - XMVectorSet(0.45f*XMVectorGetX(SceneExtents), 0.35f*XMVectorGetY(SceneExtents), 0.0f, 0.0f);
-        XMVECTOR vAt = SceneCenter - XMVectorSet(0.0f, 0.35f*XMVectorGetY(SceneExtents), 0.0f, 0.0f);
-        g_camera.SetRotateButtons(true, false, false);
-        g_camera.SetEnablePositionMovement(true);
-        g_camera.SetViewParams(vEye, vAt);
-        g_camera.SetScalers(0.005f, 0.1f*g_maxSceneDistance);
-        XMFLOAT3 vBoundaryMin, vBoundaryMax;
-        XMStoreFloat3(&vBoundaryMin, BoundaryMin);
-        XMStoreFloat3(&vBoundaryMax, BoundaryMax);
-        g_camera.SetClipToBoundary(true, &vBoundaryMin, &vBoundaryMax);
+        XMVECTOR sceneCenter = 0.5f * (sceneMax + sceneMin);
+        XMVECTOR SceneExtents = 0.5f * (sceneMax - sceneMin);
+        XMVECTOR boundaryMin = sceneCenter - 2.0f * SceneExtents;
+        XMVECTOR boundaryMax = sceneCenter + 2.0f * SceneExtents;
+        XMVECTOR boundaryDiff = boundaryMax - boundaryMin;
+        maxSceneDistance = XMVectorGetX(XMVector3Length(boundaryDiff));
+
+        XMVECTOR eye = sceneCenter - XMVectorSet(0.45f*XMVectorGetX(SceneExtents), 0.35f*XMVectorGetY(SceneExtents), 0.0f, 0.0f);
+        XMVECTOR lookAt = sceneCenter - XMVectorSet(0.0f, 0.35f*XMVectorGetY(SceneExtents), 0.0f, 0.0f);
+        camera.SetRotateButtons(true, false, false);
+        camera.SetEnablePositionMovement(true);
+        camera.SetViewParams(eye, lookAt);
+        camera.SetScalers(0.005f, 0.1f*maxSceneDistance);
+        XMFLOAT3 vboundaryMin, vboundaryMax;
+        XMStoreFloat3(&vboundaryMin, boundaryMin);
+        XMStoreFloat3(&vboundaryMax, boundaryMax);
+        camera.SetClipToBoundary(true, &vboundaryMin, &vboundaryMax);
 
         UpdateGUI();
     }
@@ -198,20 +199,20 @@ HRESULT CALLBACK OnD3D11ResizedSwapChain(ID3D11Device* pd3dDevice, IDXGISwapChai
 {
     HRESULT hr;
 
-    V_RETURN(g_dialogResourceManager.OnD3D11ResizedSwapChain(pd3dDevice, pBackBufferSurfaceDesc));
+    V_RETURN(dialogResourceManager.OnD3D11ResizedSwapChain(pd3dDevice, pBackBufferSurfaceDesc));
 
-    if (g_renderer)
+    if (tiledRenderer)
     {
-        g_renderer->Resize(pBackBufferSurfaceDesc->Width,
+        tiledRenderer->Resize(pBackBufferSurfaceDesc->Width,
                            pBackBufferSurfaceDesc->Height,
                            pBackBufferSurfaceDesc->SampleDesc.Count);
     }
 
     float aspectRatio = static_cast<float>(pBackBufferSurfaceDesc->Width) / static_cast<float>(pBackBufferSurfaceDesc->Height);
-    g_camera.SetProjParams(DirectX::XM_PI / 4.0f, aspectRatio, g_maxSceneDistance, 1.0f);
+    camera.SetProjParams(DirectX::XM_PI / 4.0f, aspectRatio, maxSceneDistance, 1.0f);
 
-    g_HUD.SetLocation(pBackBufferSurfaceDesc->Width - 250, 0);
-    g_HUD.SetSize(250, 400);
+    hud.SetLocation(pBackBufferSurfaceDesc->Width - 250, 0);
+    hud.SetSize(250, 400);
 
     return S_OK;
 }
@@ -219,25 +220,25 @@ HRESULT CALLBACK OnD3D11ResizedSwapChain(ID3D11Device* pd3dDevice, IDXGISwapChai
 void CALLBACK OnD3D11FrameRender(ID3D11Device* pd3dDevice, ID3D11DeviceContext* pd3dImmediateContext, double fTime,
                                  float elapsedTime, void* pUserContext)
 {
-    if (g_renderer)
-        g_renderer->Render(g_camera);
+    if (tiledRenderer)
+        tiledRenderer->Render(camera);
 
     RenderGUI(elapsedTime);
 }
 
 void CALLBACK OnD3D11ReleasingSwapChain(void* pUserContext)
 {
-    g_dialogResourceManager.OnD3D11ReleasingSwapChain();
+    dialogResourceManager.OnD3D11ReleasingSwapChain();
 }
 
 void CALLBACK OnD3D11DestroyDevice(void* pUserContext)
 {
-    g_renderer.reset();
+    tiledRenderer.reset();
 
-    g_dialogResourceManager.OnD3D11DestroyDevice();
+    dialogResourceManager.OnD3D11DestroyDevice();
     DXUTGetGlobalResourceCache().OnDestroyDevice();
 
-    g_textHelper.reset();
+    textHelper.reset();
 }
 
 bool CALLBACK ModifyDeviceSettings(DXUTDeviceSettings* pDeviceSettings, void* pUserContext)
@@ -268,10 +269,10 @@ bool CALLBACK ModifyDeviceSettings(DXUTDeviceSettings* pDeviceSettings, void* pU
 
 void CALLBACK OnFrameMove(double fTime, float elapsedTime, void* pUserContext)
 {
-    if (g_renderer)
-        g_renderer->Update(elapsedTime);
+    if (tiledRenderer)
+        tiledRenderer->Update(elapsedTime);
 
-    g_camera.FrameMove(elapsedTime);
+    camera.FrameMove(elapsedTime);
 }
 
 LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, bool* pbNoFurtherProcessing,
@@ -286,15 +287,15 @@ LRESULT CALLBACK MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, boo
         break;
     }
 
-    *pbNoFurtherProcessing = g_dialogResourceManager.MsgProc(hWnd, uMsg, wParam, lParam);
+    *pbNoFurtherProcessing = dialogResourceManager.MsgProc(hWnd, uMsg, wParam, lParam);
     if (*pbNoFurtherProcessing)
         return 0;
 
-    *pbNoFurtherProcessing = g_HUD.MsgProc(hWnd, uMsg, wParam, lParam);
+    *pbNoFurtherProcessing = hud.MsgProc(hWnd, uMsg, wParam, lParam);
     if (*pbNoFurtherProcessing)
         return 0;
 
-    g_camera.HandleMessages(hWnd, uMsg, wParam, lParam);
+    camera.HandleMessages(hWnd, uMsg, wParam, lParam);
 
     return 0;
 }
@@ -308,75 +309,75 @@ void CALLBACK OnGUIEvent(UINT nEvent, int nControlID, CDXUTControl* pControl, vo
         break;
     case IDC_MultiThreadedRendering:
     {
-        if (g_renderer)
+        if (tiledRenderer)
         {
-            const bool enable = g_HUD.GetCheckBox(IDC_MultiThreadedRendering)->GetChecked();
-            g_renderer->SetEnableMultiThreadedRendering(enable);
+            const bool enable = hud.GetCheckBox(IDC_MultiThreadedRendering)->GetChecked();
+            tiledRenderer->SetEnableMultiThreadedRendering(enable);
         }
         break;
     }
     case IDC_VisualizeNumLights:
     {
-        if (g_renderer)
+        if (tiledRenderer)
         {
-            const bool enable = g_HUD.GetCheckBox(IDC_VisualizeNumLights)->GetChecked();
-            g_renderer->SetVisualizeNumLights(enable);
+            const bool enable = hud.GetCheckBox(IDC_VisualizeNumLights)->GetChecked();
+            tiledRenderer->SetVisualizeNumLights(enable);
         }
         break;
     }
     case IDC_NumPointLightSlide:
     {
-        if (g_renderer)
+        if (tiledRenderer)
         {
-            const size_t numLimit = g_HUD.GetSlider(IDC_NumPointLightSlide)->GetValue();
+            const size_t numLimit = hud.GetSlider(IDC_NumPointLightSlide)->GetValue();
             const std::wstring text = std::wstring(L"NumPointLight : ") + std::to_wstring(numLimit);
-            g_HUD.GetStatic(IDC_NumPointLight)->SetText(text.c_str());
-            g_renderer->SetNumPointLightLimit(numLimit);
+            hud.GetStatic(IDC_NumPointLight)->SetText(text.c_str());
+            tiledRenderer->SetNumPointLightLimit(numLimit);
         }
         break;
     }
     case IDC_NumSpotLightSlide:
     {
-        if (g_renderer)
+        if (tiledRenderer)
         {
-            const size_t numLimit = g_HUD.GetSlider(IDC_NumSpotLightSlide)->GetValue();
+            const size_t numLimit = hud.GetSlider(IDC_NumSpotLightSlide)->GetValue();
             const std::wstring text = std::wstring(L"NumSpotLight : ") + std::to_wstring(numLimit);
-            g_HUD.GetStatic(IDC_NumSpotLight)->SetText(text.c_str());
-            g_renderer->SetNumSpotLightLimit(numLimit);
+            hud.GetStatic(IDC_NumSpotLight)->SetText(text.c_str());
+            tiledRenderer->SetNumSpotLightLimit(numLimit);
         }
         break;
     }
     case IDC_NumPointLightShadowSlide:
     {
-        if (g_renderer)
+        if (tiledRenderer)
         {
-            const size_t numLimit = g_HUD.GetSlider(IDC_NumPointLightShadowSlide)->GetValue();
+            const size_t numLimit = hud.GetSlider(IDC_NumPointLightShadowSlide)->GetValue();
             const std::wstring text = std::wstring(L"NumPointLightShadow : ") + std::to_wstring(numLimit);
-            g_HUD.GetStatic(IDC_NumPointLightShadow)->SetText(text.c_str());
-            g_renderer->SetNumPointLightShadowLimit(numLimit);
+            hud.GetStatic(IDC_NumPointLightShadow)->SetText(text.c_str());
+            tiledRenderer->SetNumPointLightShadowLimit(numLimit);
         }
         break;
     }
     case IDC_NumSpotLightShadowSlide:
     {
-        if (g_renderer)
+        if (tiledRenderer)
         {
-            const size_t numLimit = g_HUD.GetSlider(IDC_NumSpotLightShadowSlide)->GetValue();
+            const size_t numLimit = hud.GetSlider(IDC_NumSpotLightShadowSlide)->GetValue();
             const std::wstring text = std::wstring(L"NumSpotLightShadow : ") + std::to_wstring(numLimit);
-            g_HUD.GetStatic(IDC_NumSpotLightShadow)->SetText(text.c_str());
-            g_renderer->SetNumSpotLightShadowLimit(numLimit);
+            hud.GetStatic(IDC_NumSpotLightShadow)->SetText(text.c_str());
+            tiledRenderer->SetNumSpotLightShadowLimit(numLimit);
         }
         break;
     }
     case IDC_GammaSlide:
     {
-        if (g_renderer)
+        if (tiledRenderer)
         {
-            const int value = g_HUD.GetSlider(IDC_GammaSlide)->GetValue();
+            const int value = hud.GetSlider(IDC_GammaSlide)->GetValue();
             const float gamma = MathHelper::Lerp<float>(0.5f, 1.5f, static_cast<float>(value) / 50.0f);
             const std::wstring text = std::wstring(L"Gamma : ") + std::to_wstring(gamma);
-            g_HUD.GetStatic(IDC_Gamma)->SetText(text.c_str());
-            g_renderer->SetGamma(gamma);
+            hud.GetStatic(IDC_Gamma)->SetText(text.c_str());
+            tiledRenderer->SetGamma(gamma);
         }
         break;
     }
@@ -385,53 +386,53 @@ void CALLBACK OnGUIEvent(UINT nEvent, int nControlID, CDXUTControl* pControl, vo
 
 void UpdateGUI()
 {
-    if (!g_renderer)
+    if (!tiledRenderer)
         return;
 
     {
-        const int numLimit = static_cast<int>(g_renderer->GetNumPointLightLimit());
+        const int numLimit = static_cast<int>(tiledRenderer->GetNumPointLightLimit());
         const std::wstring text = std::wstring(L"NumPointLight : ") + std::to_wstring(numLimit);
-        g_HUD.GetStatic(IDC_NumPointLight)->SetText(text.c_str());
-        g_HUD.GetSlider(IDC_NumPointLightSlide)->SetValue(numLimit);
+        hud.GetStatic(IDC_NumPointLight)->SetText(text.c_str());
+        hud.GetSlider(IDC_NumPointLightSlide)->SetValue(numLimit);
     }
 
     {
-        const int numLimit = static_cast<int>(g_renderer->GetNumSpotLightLimit());
+        const int numLimit = static_cast<int>(tiledRenderer->GetNumSpotLightLimit());
         const std::wstring text = std::wstring(L"NumSpotLight : ") + std::to_wstring(numLimit);
-        g_HUD.GetStatic(IDC_NumSpotLight)->SetText(text.c_str());
-        g_HUD.GetSlider(IDC_NumSpotLightSlide)->SetValue(numLimit);
+        hud.GetStatic(IDC_NumSpotLight)->SetText(text.c_str());
+        hud.GetSlider(IDC_NumSpotLightSlide)->SetValue(numLimit);
     }
 
     {
-        const int numLimit = static_cast<int>(g_renderer->GetShadowDepthBuffer().GetNumPointLightShadowLimit());
+        const int numLimit = static_cast<int>(tiledRenderer->GetShadowDepthBuffer().GetNumPointLightShadowLimit());
         const std::wstring text = std::wstring(L"NumPointLightShadow : ") + std::to_wstring(numLimit);
-        g_HUD.GetStatic(IDC_NumPointLightShadow)->SetText(text.c_str());
-        g_HUD.GetSlider(IDC_NumPointLightShadowSlide)->SetValue(numLimit);
+        hud.GetStatic(IDC_NumPointLightShadow)->SetText(text.c_str());
+        hud.GetSlider(IDC_NumPointLightShadowSlide)->SetValue(numLimit);
     }
 
     {
-        const int numLimit = static_cast<int>(g_renderer->GetShadowDepthBuffer().GetNumSpotLightShadowLimit());
+        const int numLimit = static_cast<int>(tiledRenderer->GetShadowDepthBuffer().GetNumSpotLightShadowLimit());
         const std::wstring text = std::wstring(L"NumSpotLightShadow : ") + std::to_wstring(numLimit);
-        g_HUD.GetStatic(IDC_NumSpotLightShadow)->SetText(text.c_str());
-        g_HUD.GetSlider(IDC_NumSpotLightShadowSlide)->SetValue(numLimit);
+        hud.GetStatic(IDC_NumSpotLightShadow)->SetText(text.c_str());
+        hud.GetSlider(IDC_NumSpotLightShadowSlide)->SetValue(numLimit);
     }
 
     {
-        const bool enable = g_renderer->GetEnableMultiThreadedRendering();
-        g_HUD.GetCheckBox(IDC_MultiThreadedRendering)->SetChecked(enable);
+        const bool enable = tiledRenderer->GetEnableMultiThreadedRendering();
+        hud.GetCheckBox(IDC_MultiThreadedRendering)->SetChecked(enable);
     }
 
     {
-        const bool enable = g_renderer->GetVisualizeNumLights();
-        g_HUD.GetCheckBox(IDC_VisualizeNumLights)->SetChecked(enable);
+        const bool enable = tiledRenderer->GetVisualizeNumLights();
+        hud.GetCheckBox(IDC_VisualizeNumLights)->SetChecked(enable);
     }
 
     {
-        const float gamma = g_renderer->GetGamma();
+        const float gamma = tiledRenderer->GetGamma();
         const std::wstring text = std::wstring(L"Gamma : ") + std::to_wstring(gamma);
-        g_HUD.GetStatic(IDC_Gamma)->SetText(text.c_str());
+        hud.GetStatic(IDC_Gamma)->SetText(text.c_str());
 
         const int value = MathHelper::Min(static_cast<int>(ceil((gamma - 0.5f) * 50.0f)), 50);
-        g_HUD.GetSlider(IDC_GammaSlide)->SetValue(value);
+        hud.GetSlider(IDC_GammaSlide)->SetValue(value);
     }
 }

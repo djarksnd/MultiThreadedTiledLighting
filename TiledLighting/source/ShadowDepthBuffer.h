@@ -63,7 +63,7 @@ private:
 	RasterizerState rasterizerState;
 	SamplerState samplerState;
 
-    unsigned int bufferResolution = 0;
+    float bufferResolution = 0.0f;
     size_t numPointLightShadowLimit = NumMaxPointLightShadows;
     size_t numSpotLightShadowLimit = NumMaxSpotLightShadows;
     size_t numCurrFramePointLightShadows = 0;

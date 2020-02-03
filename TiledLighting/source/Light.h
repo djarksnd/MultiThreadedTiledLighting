@@ -3,6 +3,8 @@
 #include <DirectXMath.h>
 #include "Frustum.h"
 
+// 16bytes align for cbuffer binding. 
+#pragma pack(push, 16)
 struct PointLight
 {
 	DirectX::XMFLOAT3 position;
@@ -30,6 +32,7 @@ struct SpotLight
 	DirectX::XMFLOAT3 direction;
 	float cosHalfAngle;
 };
+#pragma pack(pop)
 
 DirectX::XMMATRIX ComputePointLightShadowMatrix(const PointLight& light, PointLight::ShadowFace face);
 DirectX::XMMATRIX ComputeSpotLightShadowMatrix(const SpotLight& light);

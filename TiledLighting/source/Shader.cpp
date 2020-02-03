@@ -2,10 +2,13 @@
 #include <fstream>
 #include "Shader.h"
 
-std::vector<Shader::Macro> Shader::EmptyMacro;
 
-bool
-Shader::Compile(ID3DBlob** out, const std::wstring& file, const std::string& funtion, const std::vector<Macro>& macros)
+
+const std::vector<Shader::Macro> Shader::EmptyMacro;
+
+
+
+bool Shader::Compile(ID3DBlob** out, const std::wstring& file, const std::string& funtion, const std::vector<Macro>& macros)
 {
 	ID3DBlob* pErrMsg = nullptr;
 
@@ -64,8 +67,7 @@ Shader::Compile(ID3DBlob** out, const std::wstring& file, const std::string& fun
 
 
 
-void
-Shader::OutputCompileErrorMessage(ID3DBlob* d3dMessage, const std::wstring& file)
+void Shader::OutputCompileErrorMessage(ID3DBlob* d3dMessage, const std::wstring& file)
 {
 	char* pCompileErrors;
 	unsigned int uBufferSize;

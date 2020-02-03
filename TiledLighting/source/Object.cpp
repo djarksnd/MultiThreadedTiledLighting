@@ -155,7 +155,7 @@ void Object::Render(ID3D11DeviceContext* deviceContext, const Frustum& frustum)
 		{
             AABBox transformedBound = subsetBounds[meshIndex][subsetIndex];
             transformedBound.Transform(transform);
-            if (!frustum.Test(DirectX::XMLoadFloat3(&transformedBound.GetMin()),
+            if (!frustum.CollisionCheck(DirectX::XMLoadFloat3(&transformedBound.GetMin()),
                 DirectX::XMLoadFloat3(&transformedBound.GetMax())))
                 continue;
 

@@ -14,7 +14,6 @@ public:
 	void Destroy();
 	operator ID3D11RasterizerState* () const { return rasterizerState; }
 
-public:
 	RasterizerState() : rasterizerState(nullptr) {}
 	~RasterizerState() { Destroy(); }
 

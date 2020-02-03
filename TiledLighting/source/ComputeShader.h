@@ -9,10 +9,11 @@ public:
 		return Shader::Type::Compute;
 	}
 	virtual void Destroy();
-	bool Create(ID3D11Device* device, const std::wstring& file, const std::string& funtion, const std::vector<Macro>& macros = Shader::EmptyMacro);
-	operator ID3D11ComputeShader* () const { return shader; }
+	bool Create(ID3D11Device* device, const std::wstring& file, const std::string& funtion,
+        const std::vector<Macro>& macros = Shader::EmptyMacro);
 
-public:
+    operator ID3D11ComputeShader* () const { return shader; }
+
 	ComputeShader() : shader(nullptr) {}
 	virtual ~ComputeShader() { Destroy(); }
 

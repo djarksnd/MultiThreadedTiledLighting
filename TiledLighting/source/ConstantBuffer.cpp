@@ -1,8 +1,9 @@
 #include <assert.h>
 #include "ConstantBuffer.h"
 
-void
-ConstantBuffer::Destroy()
+
+
+void ConstantBuffer::Destroy()
 {
 	if (buffer)
 	{
@@ -12,8 +13,7 @@ ConstantBuffer::Destroy()
 	}
 }
 
-bool
-ConstantBuffer::Update(ID3D11DeviceContext* deviceContext, const void* const data) const
+bool ConstantBuffer::Update(ID3D11DeviceContext* deviceContext, const void* const data) const
 {
 	assert(data);
 	if (nullptr == data)

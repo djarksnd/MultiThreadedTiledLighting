@@ -2,8 +2,8 @@
 #include "DepthStencilState.h"
 
 
-bool
-DepthStencilState::Create(ID3D11Device* device, const D3D11_DEPTH_STENCIL_DESC& desc)
+
+bool DepthStencilState::Create(ID3D11Device* device, const D3D11_DEPTH_STENCIL_DESC& desc)
 {
 	HRESULT result = device->CreateDepthStencilState(&desc, &depthStencilState);
 	if (FAILED(result))
@@ -17,11 +17,11 @@ DepthStencilState::Create(ID3D11Device* device, const D3D11_DEPTH_STENCIL_DESC& 
 
 
 
-bool
-DepthStencilState::Create(ID3D11Device* device, bool depthEnable, bool depthWrite,
-						  D3D11_COMPARISON_FUNC depthFunc, bool stencilEnable, unsigned char stencilReadMask,
-						  unsigned char stencilWriteMask, D3D11_STENCIL_OP stencilFailOp, D3D11_STENCIL_OP stencilDepthFailOp,
-						  D3D11_STENCIL_OP stencilPassOp, D3D11_COMPARISON_FUNC stencilFunc)
+bool DepthStencilState::Create(
+    ID3D11Device* device, bool depthEnable, bool depthWrite,
+    D3D11_COMPARISON_FUNC depthFunc, bool stencilEnable, unsigned char stencilReadMask,
+    unsigned char stencilWriteMask, D3D11_STENCIL_OP stencilFailOp, D3D11_STENCIL_OP stencilDepthFailOp,
+    D3D11_STENCIL_OP stencilPassOp, D3D11_COMPARISON_FUNC stencilFunc)
 {
 	D3D11_DEPTH_STENCIL_DESC desc;
 	desc.DepthEnable = depthEnable;
@@ -41,8 +41,7 @@ DepthStencilState::Create(ID3D11Device* device, bool depthEnable, bool depthWrit
 
 
 
-void
-DepthStencilState::Destroy()
+void DepthStencilState::Destroy()
 {
 	if (depthStencilState)
 	{

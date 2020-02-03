@@ -1,8 +1,7 @@
 #include <assert.h>
 #include "GeometryShader.h"
 
-void
-GeometryShader::Destroy()
+void GeometryShader::Destroy()
 {
 	if (shader)
 	{
@@ -13,9 +12,9 @@ GeometryShader::Destroy()
 
 
 
-bool
-GeometryShader::Create(ID3D11Device* device, const std::wstring& file,
-					   const std::string& funtion, const std::vector<Macro>& macros)
+bool GeometryShader::Create(
+    ID3D11Device* device, const std::wstring& file,
+    const std::string& funtion, const std::vector<Macro>& macros)
 {
 	assert(!file.empty());
 	assert(!funtion.empty());
@@ -35,7 +34,7 @@ GeometryShader::Create(ID3D11Device* device, const std::wstring& file,
 
 	if (FAILED(hResult))
 	{
-		assert(false && "GeometryShader 생성 실패.");
+		assert(false && "GeometryShader ?? ??.");
 		return false;
 	}
 

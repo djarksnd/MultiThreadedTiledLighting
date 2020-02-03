@@ -3,8 +3,7 @@
 
 
 
-void
-ComputeShader::Destroy()
+void ComputeShader::Destroy()
 {
 	if (shader)
 	{
@@ -13,10 +12,7 @@ ComputeShader::Destroy()
 	}
 }
 
-
-
-bool
-ComputeShader::Create(ID3D11Device* device, const std::wstring& file,
+bool ComputeShader::Create(ID3D11Device* device, const std::wstring& file,
 					  const std::string& funtion, const std::vector<Macro>& macros)
 {
 	assert(!file.empty());

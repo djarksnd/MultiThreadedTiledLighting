@@ -1,42 +1,43 @@
 #include <assert.h>
 #include "PixelShader.h"
 
-void
-PixelShader::Destroy()
+
+
+void PixelShader::Destroy()
 {
-	if (shader)
-	{
-		shader->Release();
-		shader = nullptr;
-	}
+    if (shader)
+    {
+        shader->Release();
+        shader = nullptr;
+    }
 }
 
-bool
-PixelShader::Create(ID3D11Device* device, const std::wstring& file,
-					const std::string& funtion, const std::vector<Macro>& macros)
+bool PixelShader::Create(
+    ID3D11Device* device, const std::wstring& file,
+    const std::string& funtion, const std::vector<Macro>& macros)
 {
-	assert(!file.empty());
-	assert(!funtion.empty());
+    assert(!file.empty());
+    assert(!funtion.empty());
 
-	if (file.empty() || funtion.empty())
-	{
-		return false;
-	}
+    if (file.empty() || funtion.empty())
+    {
+        return false;
+    }
 
-	ID3DBlob* blob = nullptr;
-	if (!Compile(&blob, file, funtion, macros))
-	{
-		return false;
-	}
+    ID3DBlob* blob = nullptr;
+    if (!Compile(&blob, file, funtion, macros))
+    {
+        return false;
+    }
 
-	HRESULT hResult = device->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &shader);
-	blob->Release();
+    HRESULT hResult = device->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &shader);
+    blob->Release();
 
-	if (FAILED(hResult))
-	{
-		assert(false && "PixelShader 생성 실패.");
-		return false;
-	}
+    if (FAILED(hResult))
+    {
+        assert(false && "PixelShader ?? ??.");
+        return false;
+    }
 
-	return true;
+    return true;
 }

@@ -3,10 +3,10 @@
 
 
 
-bool
-DepthStencilBuffer::Create(ID3D11Device* device, Format format,
-						   unsigned int width, unsigned int height, unsigned int arraySize,
-						   unsigned int numSubSamples, Texture::Dimension dimension)
+bool DepthStencilBuffer::Create(
+    ID3D11Device* device, Format format,
+    unsigned int width, unsigned int height, unsigned int arraySize,
+    unsigned int numSubSamples, Texture::Dimension dimension)
 {
 	DXGI_FORMAT textureFormat;
 	switch (format)
@@ -41,8 +41,9 @@ DepthStencilBuffer::Create(ID3D11Device* device, Format format,
 
 
 bool
-DepthStencilBuffer::CreateDepthStencilViews(ID3D11Device* device, Format format, unsigned int arraySize,
-											unsigned int numSubSamples, Texture::Dimension dimension)
+DepthStencilBuffer::CreateDepthStencilViews(
+    ID3D11Device* device, Format format, unsigned int arraySize,
+    unsigned int numSubSamples, Texture::Dimension dimension)
 {
 	D3D11_DEPTH_STENCIL_VIEW_DESC desc;
 	desc.Flags = 0;
@@ -148,8 +149,7 @@ DepthStencilBuffer::CreateDepthStencilViews(ID3D11Device* device, Format format,
 
 
 
-void
-DepthStencilBuffer::Clear(ID3D11DeviceContext* deviceContext, float depth, unsigned char stencil) const
+void DepthStencilBuffer::Clear(ID3D11DeviceContext* deviceContext, float depth, unsigned char stencil) const
 {
 	if (depthStencilView)
 	{

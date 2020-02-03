@@ -45,7 +45,7 @@ Frustum::Frustum(DirectX::FXMVECTOR aabMin, DirectX::FXMVECTOR aabMax)
 	planes[5] = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, -DirectX::XMVectorGetY(aabMin)); // bottom
 }
 
-bool XM_CALLCONV Frustum::Test(DirectX::FXMVECTOR position, float radius) const
+bool XM_CALLCONV Frustum::CollisionCheck(DirectX::FXMVECTOR position, float radius) const
 {
 	for (auto& plane : planes)
 	{
@@ -57,7 +57,7 @@ bool XM_CALLCONV Frustum::Test(DirectX::FXMVECTOR position, float radius) const
 	return true;
 }
 
-bool XM_CALLCONV Frustum::Test(DirectX::FXMVECTOR boundMix, DirectX::FXMVECTOR boundMax) const
+bool XM_CALLCONV Frustum::CollisionCheck(DirectX::FXMVECTOR boundMix, DirectX::FXMVECTOR boundMax) const
 {
 	for (auto& plane : planes)
 	{

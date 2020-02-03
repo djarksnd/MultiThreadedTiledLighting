@@ -113,9 +113,11 @@ float3 main(in PS_Input input) : SV_Target
 
 	const int3 location = int3(input.position.xy, 0);
 
-	float4 diffuseSpecular = diffuseSpecularBuffer.Load(location);
-	float4 normalGlossiness = normalGlossinessBuffer.Load(location);
-	normalGlossiness.xyz = normalGlossiness.xyz * 2.0f - 1.0f;
+	const float4 diffuseSpecular = diffuseSpecularBuffer.Load(location);
+
+	float3 normal;
+	float glossiness;
+	DecodeNormalGlossiness(normalGlossinessBuffer.Load(location), normal, glossiness);
 
 	const float sceneDepth = sceneDepthBuffer.Load(location);
 	float4 worldPosition = mul(float4(input.positionCS, sceneDepth, 1.0f), invViewProjectionMatrix);
@@ -145,10 +147,10 @@ float3 main(in PS_Input input) : SV_Target
 		result += CalcPointLighting(pointLightBuffer[lightIndex],
 									worldPosition.xyz, 
 									view, 
-									normalGlossiness.xyz, 
+									normal, 
 									diffuseSpecular.rgb, 
 									diffuseSpecular.a, 
-									normalGlossiness.w) * shadow;
+									glossiness) * shadow;
 	}
 #endif
 
@@ -168,10 +170,10 @@ float3 main(in PS_Input input) : SV_Target
 		result += CalcSpotLighting(spotLightBuffer[lightIndex],
 								   worldPosition.xyz, 
 								   view, 
-								   normalGlossiness.xyz, 
+								   normal, 
 								   diffuseSpecular.rgb,
 								   diffuseSpecular.a,
-								   normalGlossiness.w) * shadow;
+								   glossiness) * shadow;
 	}
 #endif
 

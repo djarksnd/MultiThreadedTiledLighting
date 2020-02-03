@@ -1,8 +1,7 @@
 #include <assert.h>
 #include "BlendState.h"
 
-bool
-BlendState::Create(ID3D11Device* device, const D3D11_BLEND_DESC& desc)
+bool BlendState::Create(ID3D11Device* device, const D3D11_BLEND_DESC& desc)
 {
 	HRESULT result = device->CreateBlendState(&desc, &blendState);
 	if (FAILED(result))
@@ -14,8 +13,7 @@ BlendState::Create(ID3D11Device* device, const D3D11_BLEND_DESC& desc)
 	return true;
 }
 
-void
-BlendState::Destroy()
+void BlendState::Destroy()
 {
 	if (blendState)
 	{

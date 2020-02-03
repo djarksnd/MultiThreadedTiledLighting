@@ -5,6 +5,9 @@
 #include "Object.h"
 #include "Light.h"
 
+
+// 16bytes align for cbuffer binding. 
+#pragma pack(push, 16)
 struct GeometryShaderCBuffer
 {
 	DirectX::XMMATRIX shadowMatrices[6];
@@ -18,6 +21,7 @@ struct VertexShaderPerLightCBuffer
 	uint32_t renderTargetIndexOffset;
 	uint32_t padding[3];
 };
+#pragma pack(pop)
 
 bool ShadowDepthBuffer::Create(const TiledRenderer& renderer,
 							   unsigned int argBufferResolution)
@@ -122,7 +126,7 @@ bool ShadowDepthBuffer::Create(const TiledRenderer& renderer,
 	if (!samplerState.Create(renderer.GetDevice(), ssDesc))
 		return false;
 
-	bufferResolution = argBufferResolution;
+	bufferResolution = static_cast<float>(argBufferResolution);
 
 	return true;
 }
@@ -145,7 +149,7 @@ void ShadowDepthBuffer::RenderPointLightShadowDepth(const TiledRenderer& rendere
 	for (size_t index = 0; index < numShadows; ++index)
 	{
 		const PointLight& light = renderer.GetPointLight(index);
-		if (!frustum.Test(DirectX::XMLoadFloat3(&light.position), light.radius))
+		if (!frustum.CollisionCheck(DirectX::XMLoadFloat3(&light.position), light.radius))
 			continue;
 
 		renderer.PostRenderTask([this, &renderer, &light, renderTargetIndex]() {
@@ -162,8 +166,8 @@ void ShadowDepthBuffer::RenderPointLightShadowDepth(const TiledRenderer& rendere
 			D3D11_VIEWPORT viewPort;
 			viewPort.TopLeftX = 0;
 			viewPort.TopLeftY = 0;
-			viewPort.Width = static_cast<float>(bufferResolution);
-			viewPort.Height = static_cast<float>(bufferResolution);
+			viewPort.Width = bufferResolution;
+			viewPort.Height = bufferResolution;
 			viewPort.MinDepth = 0.0f;
 			viewPort.MaxDepth = 1.0f;
 			deviceContext->RSSetViewports(1, &viewPort);
@@ -241,7 +245,7 @@ void ShadowDepthBuffer::RenderSpotLightShadowDepth(const TiledRenderer& renderer
 	for (size_t index = 0; index < numShadows; ++index)
 	{
 		const SpotLight& light = renderer.GetSpotLight(index);
-		if (!frustum.Test(DirectX::XMLoadFloat3(&light.position), light.radius))
+		if (!frustum.CollisionCheck(DirectX::XMLoadFloat3(&light.position), light.radius))
 			continue;
 
 		renderer.PostRenderTask([this, &renderer, &light, renderTargetIndex]() {
@@ -257,8 +261,8 @@ void ShadowDepthBuffer::RenderSpotLightShadowDepth(const TiledRenderer& renderer
 			D3D11_VIEWPORT viewPort;
 			viewPort.TopLeftX = 0;
 			viewPort.TopLeftY = 0;
-			viewPort.Width = static_cast<float>(bufferResolution);
-			viewPort.Height = static_cast<float>(bufferResolution);
+			viewPort.Width = bufferResolution;
+			viewPort.Height = bufferResolution;
 			viewPort.MinDepth = 0.0f;
 			viewPort.MaxDepth = 1.0f;
 			deviceContext->RSSetViewports(1, &viewPort);

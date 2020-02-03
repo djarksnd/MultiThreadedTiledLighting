@@ -16,7 +16,6 @@ public:
 	operator ID3D11Buffer* () const { return buffer; }
 	unsigned int GetSize() const { return size; }
 
-public:
 	ConstantBuffer() : buffer(0), size(0) {}
 	~ConstantBuffer() { Destroy(); }
 

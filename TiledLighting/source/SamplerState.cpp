@@ -2,8 +2,7 @@
 #include "SamplerState.h"
 
 
-bool
-SamplerState::Create(ID3D11Device* device, const D3D11_SAMPLER_DESC& desc)
+bool SamplerState::Create(ID3D11Device* device, const D3D11_SAMPLER_DESC& desc)
 {
 	HRESULT result = device->CreateSamplerState(&desc, &samplerState);
 	if (FAILED(result))
@@ -17,8 +16,7 @@ SamplerState::Create(ID3D11Device* device, const D3D11_SAMPLER_DESC& desc)
 
 
 
-void
-SamplerState::Destroy()
+void SamplerState::Destroy()
 {
 	if (samplerState)
 	{

@@ -12,7 +12,6 @@ public:
 	operator ID3D11VertexShader* () const { return shader; }
 	ID3D11InputLayout* GetInputLayout() const { return inputLayout; }
 
-public:
 	VertexShader() : shader(nullptr), inputLayout(nullptr) {}
 	~VertexShader() { Destroy(); }
 

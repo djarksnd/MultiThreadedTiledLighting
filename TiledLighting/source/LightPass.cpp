@@ -6,6 +6,8 @@
 #include "TiledRenderer.h"
 #include "Frustum.h"
 
+// 16bytes align for cbuffer binding. 
+#pragma pack(push, 16)
 struct LightCullingCSCBuffer
 {
 	DirectX::XMMATRIX invProjectionMatrix;
@@ -32,6 +34,7 @@ struct DeferredLightingPSCBuffer
 	DirectX::XMMATRIX pointLightShadowMatrices[ShadowDepthBuffer::NumMaxPointLightShadows][6];
 	DirectX::XMMATRIX spotLightShadowMatrices[ShadowDepthBuffer::NumMaxSpotLightShadows];
 };
+#pragma pack(pop)
 
 bool LightPass::Create(const TiledRenderer& renderer)
 {
@@ -176,14 +179,14 @@ void LightPass::CullLights(const TiledRenderer& renderer)
 	for (size_t index = 0; index < renderer.GetNumPointLightLimit(); ++index)
 	{
         const PointLight& light = renderer.GetPointLight(index);
-		if (frustum.Test(DirectX::XMLoadFloat3(&light.position), light.radius))
+		if (frustum.CollisionCheck(DirectX::XMLoadFloat3(&light.position), light.radius))
 			pointLights.push_back(light);
 	}
 
     for (size_t index = 0; index < renderer.GetNumSpotLightLimit(); ++index)
     {
         const SpotLight& light = renderer.GetSpotLight(index);
-        if (frustum.Test(DirectX::XMLoadFloat3(&light.position), light.radius))
+        if (frustum.CollisionCheck(DirectX::XMLoadFloat3(&light.position), light.radius))
             spotLights.push_back(light);
     }
 

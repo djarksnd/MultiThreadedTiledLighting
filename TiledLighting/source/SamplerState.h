@@ -9,7 +9,6 @@ public:
 	void Destroy();
 	operator ID3D11SamplerState* () const { return samplerState; }
 
-public:
 	SamplerState() : samplerState(nullptr) {}
 	~SamplerState() { Destroy(); }
 

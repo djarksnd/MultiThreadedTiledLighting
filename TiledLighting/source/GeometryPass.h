@@ -18,6 +18,14 @@ class GeometryPass
 public:
 	struct BufferType
 	{
+        // DiffuseSpecular buffer format [R8G8B8A8_UNORM]
+        // DiffuseSpecular.RGB = DiffuseColor.RGB
+        // DiffuseSpecular.A = Specular intensity
+
+        // NormalGlossiness buffer format [R10G10B10A2_UNORM]
+        // NormalGlossiness.RG = Normal.XY;
+        // NormalGlossiness.B = Specular power;
+        // NormalGlossiness.A = Normal Z sign;
 		enum Type
 		{
 			DiffuseSpecular = 0,

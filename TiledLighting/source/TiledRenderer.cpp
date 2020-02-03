@@ -8,11 +8,14 @@
 #include "TiledRenderer.h"
 #include "MathHelper.h"
 
+// 16bytes align for cbuffer binding. 
+#pragma pack(push, 16)
 struct PostprocessCBuffer
 {
     float invGamma;
     float padding[3];
 };
+#pragma pack(pop)
 
 DWORD CountSetBits(ULONG_PTR bitMask) {
 
@@ -150,10 +153,10 @@ void TiledRenderer::InitObjects()
     maskedObjects.push_back(decorationObject);
 
     for (auto& object : opaqueObjects)
-        bound += object->GetBound();
+        sceneBound += object->GetBound();
 
     for (auto& object : maskedObjects)
-        bound += object->GetBound();
+        sceneBound += object->GetBound();
 }
 
 void TiledRenderer::InitLights()
@@ -182,9 +185,9 @@ void TiledRenderer::InitLights()
         }
         else
         {
-            light.position.x = MathHelper::Lerp(bound.GetMin().x, bound.GetMax().x, static_cast<float>(dist(gen)) / 1024.0f);
-            light.position.y = MathHelper::Lerp(bound.GetMin().y, bound.GetMax().y, static_cast<float>(dist(gen)) / 1024.0f);
-            light.position.z = MathHelper::Lerp(bound.GetMin().z, bound.GetMax().z, static_cast<float>(dist(gen)) / 1024.0f);
+            light.position.x = MathHelper::Lerp(sceneBound.GetMin().x, sceneBound.GetMax().x, static_cast<float>(dist(gen)) / 1024.0f);
+            light.position.y = MathHelper::Lerp(sceneBound.GetMin().y, sceneBound.GetMax().y, static_cast<float>(dist(gen)) / 1024.0f);
+            light.position.z = MathHelper::Lerp(sceneBound.GetMin().z, sceneBound.GetMax().z, static_cast<float>(dist(gen)) / 1024.0f);
             light.radius = MathHelper::Lerp(100.0f, 150.0f, static_cast<float>(dist(gen)) / 1024.0f);
             light.color.x = MathHelper::Lerp(0.15f, 1.0f, static_cast<float>(dist(gen)) / 1024.0f);
             light.color.y = MathHelper::Lerp(0.15f, 1.0f, static_cast<float>(dist(gen)) / 1024.0f);
@@ -225,9 +228,9 @@ void TiledRenderer::InitLights()
         }
         else
         {
-            light.position.x = MathHelper::Lerp(bound.GetMin().x, bound.GetMax().x, static_cast<float>(dist(gen)) / 1024.0f);
-            light.position.y = MathHelper::Lerp(bound.GetMin().y, bound.GetMax().y, static_cast<float>(dist(gen)) / 1024.0f);
-            light.position.z = MathHelper::Lerp(bound.GetMin().z, bound.GetMax().z, static_cast<float>(dist(gen)) / 1024.0f);
+            light.position.x = MathHelper::Lerp(sceneBound.GetMin().x, sceneBound.GetMax().x, static_cast<float>(dist(gen)) / 1024.0f);
+            light.position.y = MathHelper::Lerp(sceneBound.GetMin().y, sceneBound.GetMax().y, static_cast<float>(dist(gen)) / 1024.0f);
+            light.position.z = MathHelper::Lerp(sceneBound.GetMin().z, sceneBound.GetMax().z, static_cast<float>(dist(gen)) / 1024.0f);
             light.radius = MathHelper::Lerp(100.0f, 200.0f, static_cast<float>(dist(gen)) / 1024.0f);
             light.color.x = MathHelper::Lerp(0.15f, 1.0f, static_cast<float>(dist(gen)) / 1024.0f);
             light.color.y = MathHelper::Lerp(0.15f, 1.0f, static_cast<float>(dist(gen)) / 1024.0f);
@@ -437,7 +440,7 @@ void TiledRenderer::DrawScreenAlignQuad() const
 void TiledRenderer::PostRenderTask(const std::function<void()>& task) const
 {
     if (enableMultiThreadedRendering)
-        renderingTasks.push_back(RenderingTask{ task, nullptr });
+        renderingTasks.push_back(RenderingTask{ nullptr, task });
     else
         task();
 }

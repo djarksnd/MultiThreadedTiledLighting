@@ -17,7 +17,6 @@ public:
 	void Destroy();
 	operator ID3D11DepthStencilState* () const { return depthStencilState; }
 
-public:
 	DepthStencilState() : depthStencilState(nullptr) {}
 	~DepthStencilState() { Destroy(); }
 
