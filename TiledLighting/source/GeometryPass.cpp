@@ -117,7 +117,7 @@ bool GeometryPass::Resize(const TiledRenderer& renderer)
 
 void GeometryPass::Render(const TiledRenderer& renderer)
 {
-    // drawing geometry buffer.
+    // Drawing geometry buffer.
 	renderer.PostRenderTask([this, &renderer]() {
 		ID3D11DeviceContext* deviceContext = renderer.GetDeviceContext();
 
@@ -152,7 +152,7 @@ void GeometryPass::Render(const TiledRenderer& renderer)
 
 		const Frustum frustum(renderer.GetViewInfo().invViewProjectionMatrix);
 
-        // drawing opaque objects geometries.
+        // Drawing opaque objects geometries.
 		deviceContext->PSSetShader(opaquePixelShader, nullptr, 0);
 		for (auto& object : renderer.GetOpaqueObjects())
 		{

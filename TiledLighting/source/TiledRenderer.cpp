@@ -460,7 +460,7 @@ void TiledRenderer::Render(const CBaseCamera& camera)
     sceneRenderTarget.Clear(GetDeviceContext(), clearColor);
     sceneDepthStencilBuffer.Clear(GetDeviceContext(), 0.0f, 0);
 
-    // Write geometry of objects to geometry buffer.
+    // Write geometry data of objects to geometry buffer.
     geometryPass.Render(*this);
 
     // Draw shadow depth before performing drawing lights.
@@ -470,7 +470,7 @@ void TiledRenderer::Render(const CBaseCamera& camera)
     // This function also uses the compute shader to culling the lights before drawing them.
     lightPass.Render(*this);
 
-    // Perform a gamma operation and print the sceneColor to the back buffer.
+    // Perform gamma operation and print the scene color to the back buffer.
     RenderPostprocess();
 
     // Run registered rendering tasks using multithreading and wait for all rendering tests to complete.
@@ -529,7 +529,7 @@ void TiledRenderer::RenderingThreadProc(RenderingThread& thread, TiledRenderer& 
             {
                 RenderingTask& task = renderer.renderingTasks[taskIndex];
 
-                // Run task and Record command list of rendering tasks.
+                // Run rendering task and record command list of the rendering task.
                 task.task();
                 renderer.GetDeviceContext()->FinishCommandList(false, &task.commandList);
             }

@@ -164,7 +164,7 @@ bool LightPass::Resize(const TiledRenderer& renderer)
 void LightPass::Render(const TiledRenderer& renderer)
 {
     renderer.PostRenderTask([this, &renderer]() {
-        // Lights culling with compute shader and screen align tile's frustums.
+        // Cull lights with compute shader and screen align tile's frustums.
         CullLights(renderer);
 
         // Calculate lighting with gbuffers and gpu lights culling results to scene color buffer.
@@ -174,9 +174,9 @@ void LightPass::Render(const TiledRenderer& renderer)
 
 void LightPass::CullLights(const TiledRenderer& renderer)
 {
-    // Lights culling with compute shader and screen align tile's frustums.
+    // Cull lights with compute shader and screen align tile's frustums.
 
-    // cpu culling with camera frustum before gpu culling.
+    // Cpu culling with camera frustum before gpu culling.
     pointLights.clear();
     spotLights.clear();
 
@@ -198,7 +198,7 @@ void LightPass::CullLights(const TiledRenderer& renderer)
 
     ID3D11DeviceContext* deviceContext = renderer.GetDeviceContext();
 
-    // cup culling results update.
+    // Cup culling results update.
     pointLightBuffer.Update(deviceContext,
         pointLights.data(),
         static_cast<unsigned int>(pointLights.size() * sizeof(PointLight)));
@@ -207,7 +207,7 @@ void LightPass::CullLights(const TiledRenderer& renderer)
         spotLights.data(),
         static_cast<unsigned int>(spotLights.size() * sizeof(SpotLight)));
 
-    // gpu culling with compute shader.
+    // Gpu culling with compute shader.
     ID3D11ShaderResourceView* srvs[] = {
         renderer.GetSceneDepthStencilBuffer(),
         pointLightBuffer,
@@ -235,7 +235,6 @@ void LightPass::CullLights(const TiledRenderer& renderer)
 
     deviceContext->CSSetShader(lightCullingComputeShader, nullptr, 0);
 
-    // light culling compute shader execution.
     deviceContext->Dispatch(GetNumTileX(renderer.GetScreenWidth()),
         GetNumTileY(renderer.GetScreenHeight()),
         1);

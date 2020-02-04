@@ -1,3 +1,4 @@
+
 # README
 DirectX11의 DeferredContext를 이용한 MultiThreadedTiledLighting 구현입니다. 
 
@@ -15,5 +16,20 @@ DirectX11의 DeferredContext를 이용한 MultiThreadedTiledLighting 구현입니다.
 
 ## Important Implementations  
 * MultiThreadedRendering with DeferredContext
+	* 구현 내용은 아래의 함수들을 보시면 됩니다.
+		* TiledRenderer.cpp
+			* TiledRenderer::Render
+			* TiledRenderer::FlushRenderTasks
+			* TiledRenderer::RenderingThreadProc
 * TiledSorted Deferred Rendering
-* Dynamic PointLight Shadow with GeometryShader and RenderTargetArray 
+	* 구현 내용은 아래의 함수들을 보시면 됩니다.
+		* LightPass.cpp
+			* LightPass::Render
+		* LightCullingComputeShader.hlsl
+			* main
+* One - pass Dynamic PointLight Shadow with GeometryShader and RenderTargetArray 
+	* 구현 내용은 아래의 함수들을 보시면 됩니다.
+		* ShadowDepthBuffer.cpp
+			* ShadowDepthBuffer::RenderPointLightShadowDepth
+		* ShadowDepthGeometryShader.hlsl
+			* main
