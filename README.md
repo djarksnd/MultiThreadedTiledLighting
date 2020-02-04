@@ -1,8 +1,9 @@
-
 # README
 DirectX11의 DeferredContext를 이용한 MultiThreadedTiledLighting 구현입니다. 
 
-<img src="https://github.com/djarksnd/MultiThreadedTiledLighting/blob/master/ScreenShot.png?raw=true" width=500 height=350> 
+<img src="https://github.com/djarksnd/MultiThreadedTiledLighting/blob/master/ScreenShot.png?raw=true" width=400 height=300> 
+
+<img src="https://github.com/djarksnd/MultiThreadedTiledLighting/blob/master/AnimatedGIF.gif?raw=true" width=400 height=300> 
 
 ## Files
 이 포트폴리오는 실행파일을 빌드 할 수 있는 프로젝트 파일과(Visual Studio 2017 & 2019) 빌드된 바이너리 파일을 포함합니다.
