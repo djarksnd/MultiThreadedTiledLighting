@@ -1,36 +1,25 @@
 # README
-DirectX11ÀÇ DeferredContext¸¦ ÀÌ¿ëÇÑ MultiThreadedTiledLighting ±¸ÇöÀÔ´Ï´Ù. 
+DirectX11ì˜ DeferredContextë¥¼ ì´ìš©í•œ MultiThreadedTiledLighting êµ¬í˜„ì…ë‹ˆë‹¤. 
 
 <img src="https://github.com/djarksnd/MultiThreadedTiledLighting/blob/master/ScreenShot.png?raw=true" width=400 height=300> 
 
 <img src="https://github.com/djarksnd/MultiThreadedTiledLighting/blob/master/AnimatedGIF.gif?raw=true" width=400 height=300> 
 
-## Files
-ÀÌ Æ÷Æ®Æú¸®¿À´Â ½ÇÇàÆÄÀÏÀ» ºôµå ÇÒ ¼ö ÀÖ´Â ÇÁ·ÎÁ§Æ® ÆÄÀÏ°ú(Visual Studio 2017 & 2019) ºôµåµÈ ¹ÙÀÌ³Ê¸® ÆÄÀÏÀ» Æ÷ÇÔÇÕ´Ï´Ù.
-* `bin`  _½ÇÇà °¡´ÉÇÑ ¹ÙÀÌ³Ê¸® ÆÄÀÏ Æú´õ_
-    * `TiledLighting_x64_release.exe`  _½ÇÇà °¡´ÉÇÑ ¹ÙÀÌ³Ê¸®  ÆÄÀÏ(Windows 64bit only / ¹ÙÀÌ³Ê¸® ÆÄÀÏ ½ÇÇà ½Ã Ãß°¡ DLLÀÌ ÇÊ¿äÇÒ ¼ö ÀÖ½À´Ï´Ù.)_
-* `dxut`  _DXUTÇÁ·ÎÁ§Æ® Æú´õ (Æ÷Æ®Æú¸®¿À ºôµå ½Ã ÇÊ¿ä)_
-*  `media`  _Æ÷Æ®Æú¸®¿À µ¥ÀÌÅÍ Æú´õ(½¦ÀÌ´õ ÄÚµå & ±×·¡ÇÈ µ¥ÀÌÅÍ)_
-* `TiledLighting`  _C++ ¼Ò½ºÄÚµå ¹× ÇÁ·ÎÁ§Æ® ÆÄÀÏ Æú´õ_
-* `TiledLighting_VS2017_Win10.sln`  _Visual Studio 2017 ¼Ö·ç¼Ç ÆÄÀÏ_
-* `TiledLighting_VS2019_Win10.sln`  _Visual Studio 2019 ¼Ö·ç¼Ç ÆÄÀÏ_
-
 ## Important Implementations  
 * MultiThreadedRendering with DeferredContext
-	* ±¸Çö ³»¿ëÀº ¾Æ·¡ÀÇ ÇÔ¼öµéÀ» º¸½Ã¸é µË´Ï´Ù.
-		* TiledRenderer.cpp
-			* TiledRenderer::Render
-			* TiledRenderer::FlushRenderTasks
-			* TiledRenderer::RenderingThreadProc
 * TiledSorted Deferred Rendering
-	* ±¸Çö ³»¿ëÀº ¾Æ·¡ÀÇ ÇÔ¼öµéÀ» º¸½Ã¸é µË´Ï´Ù.
-		* LightPass.cpp
-			* LightPass::Render
-		* LightCullingComputeShader.hlsl
-			* main
 * One - pass Dynamic PointLight Shadow with GeometryShader and RenderTargetArray 
-	* ±¸Çö ³»¿ëÀº ¾Æ·¡ÀÇ ÇÔ¼öµéÀ» º¸½Ã¸é µË´Ï´Ù.
-		* ShadowDepthBuffer.cpp
-			* ShadowDepthBuffer::RenderPointLightShadowDepth
-		* ShadowDepthGeometryShader.hlsl
-			* main
+
+## Files
+ì´ í¬íŠ¸í´ë¦¬ì˜¤ëŠ” ì‹¤í–‰íŒŒì¼ì„ ë¹Œë“œ í•  ìˆ˜ ìˆëŠ” í”„ë¡œì íŠ¸ íŒŒì¼ê³¼(Visual Studio 2017 & 2019) ë¹Œë“œëœ ë°”ì´ë„ˆë¦¬ íŒŒì¼ì„ í¬í•¨í•©ë‹ˆë‹¤.
+* `bin`  _ì‹¤í–‰ ê°€ëŠ¥í•œ ë°”ì´ë„ˆë¦¬ íŒŒì¼ í´ë”_
+    * `TiledLighting_x64_release.exe`  _ì‹¤í–‰ ê°€ëŠ¥í•œ ë°”ì´ë„ˆë¦¬  íŒŒì¼(Windows 64bit only / ë°”ì´ë„ˆë¦¬ íŒŒì¼ ì‹¤í–‰ ì‹œ ì¶”ê°€ DLLì´ í•„ìš”í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤.)_
+* `dxut`  _DXUTí”„ë¡œì íŠ¸ í´ë” (í¬íŠ¸í´ë¦¬ì˜¤ ë¹Œë“œ ì‹œ í•„ìš”)_
+*  `media`  _í¬íŠ¸í´ë¦¬ì˜¤ ë°ì´í„° í´ë”(ì‰ì´ë” ì½”ë“œ & ê·¸ë˜í”½ ë°ì´í„°)_
+* `TiledLighting`  _C++ ì†ŒìŠ¤ì½”ë“œ ë° í”„ë¡œì íŠ¸ íŒŒì¼ í´ë”_
+* `TiledLighting_VS2017_Win10.sln`  _Visual Studio 2017 ì†”ë£¨ì…˜ íŒŒì¼_
+* `TiledLighting_VS2019_Win10.sln`  _Visual Studio 2019 ì†”ë£¨ì…˜ íŒŒì¼_
+
+## Download Release
+* MultiThreadedTiledLighting.zip
+	* https://github.com/djarksnd/MultiThreadedTiledLighting/releases/download/1.0/MultiThreadedTiledLighting.zip
