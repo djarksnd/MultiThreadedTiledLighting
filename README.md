@@ -1,6 +1,7 @@
 # README
 DirectX11의 [DeferredContext](https://docs.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-render-multi-thread-render)를 이용한 MultiThreadedTiledLighting 구현입니다.  
 다수의 조명과 그림자를 표현합니다.
+
 <img src="https://github.com/djarksnd/MultiThreadedTiledLighting/blob/master/AnimatedGIF.gif?raw=true" width=400 height=300> 
 
 ## Important Implementations
