@@ -14,7 +14,7 @@ struct PS_INPUT
 
 struct PS_OUTPUT
 {
-	float4 sceneColor : SV_Target0;
+	float3 sceneColor : SV_Target0;
 	float4 diffuseSpecular : SV_Target1;
 	float4 normalGlossiness : SV_Target2;
 };
@@ -24,6 +24,7 @@ PS_OUTPUT main(PS_INPUT input)
 	PS_OUTPUT Output;
 
 	const float4 diffuse = diffuseTexture.Sample(texSampler, input.texcoord);
+	const float specularIntensity = 0.1f;
 	const float glossiness = 60.0f;
 #if AlphaTestEnable
 	clip(diffuse.a - 0.333f);
@@ -37,8 +38,8 @@ PS_OUTPUT main(PS_INPUT input)
 	float3x3 btnMatrix = float3x3(biNormal, input.tangent, input.normal);
 	normal = normalize(mul(normal, btnMatrix));
 
-	Output.sceneColor = diffuse * 0.01f;
-	Output.diffuseSpecular = float4(diffuse.rgb, 0.02f);
+	Output.sceneColor = diffuse.rgb * 0.01f; // ambient light
+	Output.diffuseSpecular = float4(diffuse.rgb, specularIntensity);
 	Output.normalGlossiness = InCodeNormalGlossiness(normal, glossiness);
 	return Output;
 }
