@@ -109,7 +109,7 @@ float4 InCodeNormalGlossiness(in const float3 normal, in const float glossiness)
 	// NormalGlossinessBuffer.A = Normal Z sign;
 	return float4(
 		normal.xy * 0.5f + 0.5f,			// RG
-		glossiness / 1024.0f,				// B
+		glossiness / 1023.0f,				// B
 		(normal.z < 0.0f) ? 1.0f : 0.0f);	// A
 }
 
@@ -123,5 +123,5 @@ void DecodeNormalGlossiness(in const float4 normalGlossiness, out float3 normal,
 	normal.z = sqrt(1.0f - saturate(dot(normal.xy, normal.xy))) * ((normalGlossiness.w == 0.0f) ? 1.0f : -1.0f);
 	normal = normalize(normal);
 
-	glossiness = normalGlossiness.z * 1024.0f;
+	glossiness = normalGlossiness.z * 1023.0f;
 }
