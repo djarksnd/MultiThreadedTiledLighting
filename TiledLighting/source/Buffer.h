@@ -3,7 +3,7 @@
 #include <D3D11.h>
 
 #include "ResourceBindFlags.h"
-#include "ResourceCPUAccessFlags.h"
+#include "AccessFlags.h"
 
 class Buffer
 {
@@ -11,7 +11,7 @@ public:
     bool Create(ID3D11Device* device, DXGI_FORMAT format,
         unsigned int bufferSize, unsigned int elementSize,
         const ResourceBindFlags& bindFlags,
-        const ResourceCPUAccessFlags& cpuAccessFlags,
+        const AccessFlags& cpuAccessFlags,
         const void* initData = nullptr);
 
     void Destroy();

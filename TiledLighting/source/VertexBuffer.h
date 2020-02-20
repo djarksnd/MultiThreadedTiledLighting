@@ -1,13 +1,13 @@
 #pragma once
 
 #include <D3D11.h>
-#include "ResourceCPUAccessFlags.h"
+#include "AccessFlags.h"
 
 class VertexBuffer
 {
 public:
 	bool Create(ID3D11Device* device, unsigned int size, bool streamOut,
-				const ResourceCPUAccessFlags& cpuAccessFlags, void* data);
+				const AccessFlags& cpuAccessFlags, void* data);
 	void Destroy();
 	unsigned int GetStride() const { return stride; }
 	unsigned int GetOffser() const { return offset; }

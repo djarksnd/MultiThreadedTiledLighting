@@ -147,9 +147,6 @@
     <ClInclude Include="source\ResourceBindFlags.h">
       <Filter>source\d3dResourceClass</Filter>
     </ClInclude>
-    <ClInclude Include="source\ResourceCPUAccessFlags.h">
-      <Filter>source\d3dResourceClass</Filter>
-    </ClInclude>
     <ClInclude Include="source\Texture.h">
       <Filter>source\d3dResourceClass</Filter>
     </ClInclude>
@@ -170,6 +167,9 @@
     </ClInclude>
     <ClInclude Include="source\AABBox.h">
       <Filter>source</Filter>
+    </ClInclude>
+    <ClInclude Include="source\AccessFlags.h">
+      <Filter>source\d3dResourceClass</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

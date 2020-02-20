@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "ResourceBindFlags.h"
-#include "ResourceCPUAccessFlags.h"
+#include "AccessFlags.h"
 
 class Texture
 {
@@ -22,7 +22,7 @@ public:
 	bool Create(ID3D11Device* device, DXGI_FORMAT format,
 				unsigned int width, unsigned int height, unsigned int arraySize,
 				unsigned int mipLevels, unsigned int numSubSamples, Dimension dimension,
-				const ResourceBindFlags& bindFlags, const ResourceCPUAccessFlags& cpuAccessFlags);
+				const ResourceBindFlags& bindFlags, const AccessFlags& cpuAccessFlags);
 
 	virtual void Destroy();
 
@@ -43,7 +43,7 @@ private:
 	bool CreateResource(ID3D11Device* device, DXGI_FORMAT format,
 						unsigned int width, unsigned int height, unsigned int arraySize,
 						unsigned int mipLevels, unsigned int numSubSamples, Dimension dimension,
-						const ResourceBindFlags& bindFlags, const ResourceCPUAccessFlags& cpuAccessFlags);
+						const ResourceBindFlags& bindFlags, const AccessFlags& cpuAccessFlags);
 
 	bool CreateShaderResourceView(ID3D11Device* device, DXGI_FORMAT format, unsigned int arraySize,
 								  unsigned int mipLevels, unsigned int numSubSamples, Dimension dimension);

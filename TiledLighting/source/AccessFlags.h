@@ -1,6 +1,6 @@
 #pragma once
 
-struct ResourceCPUAccessFlags
+struct AccessFlags
 {
 	bool read = false;
 	bool write = false;
@@ -11,11 +11,11 @@ struct ResourceCPUAccessFlags
 		writeBit = 1 << 1,
 	};
 
-	ResourceCPUAccessFlags(unsigned int bitFlags)
+	AccessFlags(unsigned int bitFlags)
 	{
 		read = bitFlags & readBit;
 		write = bitFlags & writeBit;
 	}
 
-	ResourceCPUAccessFlags() {}
+	AccessFlags() {}
 };

@@ -3,7 +3,7 @@
 
 bool VertexBuffer::Create(
     ID3D11Device* device, unsigned int size, bool streamOut,
-    const ResourceCPUAccessFlags& cpuAccessFlags, void* data)
+    const AccessFlags& cpuAccessFlags, void* data)
 {
     D3D11_BUFFER_DESC bfDesc;
     bfDesc.ByteWidth = size;

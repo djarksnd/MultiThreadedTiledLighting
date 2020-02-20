@@ -7,7 +7,7 @@ bool Texture::Create(
     ID3D11Device* device, DXGI_FORMAT format,
     unsigned int width, unsigned int height, unsigned int arraySize,
     unsigned int mipLevels, unsigned int numSubSamples, Dimension dimension,
-    const ResourceBindFlags& bindFlags, const ResourceCPUAccessFlags& cpuAccessFlags)
+    const ResourceBindFlags& bindFlags, const AccessFlags& cpuAccessFlags)
 {
     if (!CreateResource(device, format, width, height, arraySize, mipLevels, numSubSamples,
         dimension, bindFlags, cpuAccessFlags))
@@ -40,7 +40,7 @@ bool Texture::CreateResource(
     ID3D11Device* device, DXGI_FORMAT format,
     unsigned int width, unsigned int height, unsigned int arraySize,
     unsigned int mipLevels, unsigned int numSubSamples, Dimension dimension,
-    const ResourceBindFlags& bindFlags, const ResourceCPUAccessFlags& cpuAccessFlags)
+    const ResourceBindFlags& bindFlags, const AccessFlags& cpuAccessFlags)
 {
     unsigned int textureBindFlags = bindFlags.RenderTarget ? D3D11_BIND_RENDER_TARGET : 0;
     textureBindFlags |= bindFlags.DepthStencil ? D3D11_BIND_DEPTH_STENCIL : 0;

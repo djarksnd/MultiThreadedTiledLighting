@@ -43,12 +43,12 @@ bool LightPass::Create(const TiledRenderer& renderer)
 
     if (!pointLightBuffer.Create(renderer.GetDevice(), DXGI_FORMAT_UNKNOWN,
         sizeof(PointLight) * TiledRenderer::NumMaxPointLights, sizeof(PointLight),
-        ResourceBindFlags::ShaderResourceBit, ResourceCPUAccessFlags::writeBit))
+        ResourceBindFlags::ShaderResourceBit, AccessFlags::writeBit))
         return false;
 
     if (!spotLightBuffer.Create(renderer.GetDevice(), DXGI_FORMAT_UNKNOWN,
         sizeof(SpotLight) * TiledRenderer::NumMaxSpotLights, sizeof(SpotLight),
-        ResourceBindFlags::ShaderResourceBit, ResourceCPUAccessFlags::writeBit))
+        ResourceBindFlags::ShaderResourceBit, AccessFlags::writeBit))
         return false;
 
     if (!lightCullingCSCBuffer.Create(renderer.GetDevice(), sizeof(LightCullingCSCBuffer)))

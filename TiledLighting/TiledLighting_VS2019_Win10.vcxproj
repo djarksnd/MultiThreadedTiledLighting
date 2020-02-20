@@ -46,7 +46,7 @@
     <ClInclude Include="source\Frustum.h" />
     <ClInclude Include="source\Light.h" />
     <ClInclude Include="source\MathHelper.h" />
-    <ClInclude Include="source\ResourceCPUAccessFlags.h" />
+    <ClInclude Include="source\AccessFlags.h" />
     <ClInclude Include="source\DepthStencilBuffer.h" />
     <ClInclude Include="source\DepthStencilState.h" />
     <ClInclude Include="source\GeometryPass.h" />

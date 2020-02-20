@@ -4,7 +4,7 @@
 bool Buffer::Create(ID3D11Device* device, DXGI_FORMAT format,
 			   unsigned int argBufferSize, unsigned int elementSize, 
 			   const ResourceBindFlags& bindFlags,
-			   const ResourceCPUAccessFlags& cpuAccessFlags, 
+			   const AccessFlags& cpuAccessFlags, 
 			   const void* initData)
 {
 	assert(argBufferSize);
