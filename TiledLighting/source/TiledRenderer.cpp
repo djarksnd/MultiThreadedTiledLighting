@@ -78,8 +78,6 @@ bool TiledRenderer::Create(ID3D11Device* argDevice, ID3D11DeviceContext* argImme
     immediateContext = argImmediateContext;
     immediateContext->AddRef();
 
-    mutexLock = std::unique_lock<std::shared_mutex>(sharedMutex);
-
     const size_t NumRenderingThreads = GetLogicalProcessorCount();
     if (NumRenderingThreads > 0)
     {
@@ -89,7 +87,7 @@ bool TiledRenderer::Create(ID3D11Device* argDevice, ID3D11DeviceContext* argImme
             if (FAILED(device->CreateDeferredContext(0, &thread.deferredContext)))
                 return false;
 
-            thread.execution = true;
+            thread.isRun = true;
             thread.thread = std::thread(RenderingThreadProc, std::ref(thread), std::ref(*this));
             thread.id = thread.thread.get_id();
         }
@@ -99,23 +97,22 @@ bool TiledRenderer::Create(ID3D11Device* argDevice, ID3D11DeviceContext* argImme
     screenHeight = argScreenHeight;
     numSubSamples = argNumSubSamples;
 
-    if (!sceneRenderTarget.Create(
-        device,
-        DXGI_FORMAT_R11G11B10_FLOAT,
-        ResourceBindFlags::RenderTargetBit | ResourceBindFlags::ShaderResourceBit,
-        screenWidth,
-        screenHeight,
-        1,
-        numSubSamples))
+    if (!sceneRenderTarget.Create(device,
+                                  DXGI_FORMAT_R11G11B10_FLOAT,
+                                  ResourceBindFlags::RenderTargetBit | ResourceBindFlags::ShaderResourceBit,
+                                  screenWidth,
+                                  screenHeight,
+                                  1,
+                                  numSubSamples))
         return false;
 
     if (!sceneDepthStencilBuffer.Create(device,
-        DepthStencilBuffer::Format::Depth24_Stencil8,
-        screenWidth,
-        screenHeight,
-        1,
-        numSubSamples,
-        Texture::Dimension::Dimension2D))
+                                        DepthStencilBuffer::Format::Depth24_Stencil8,
+                                        screenWidth,
+                                        screenHeight,
+                                        1,
+                                        numSubSamples,
+                                        Texture::Dimension::Dimension2D))
         return false;
 
     if (!postprocessPixelShader.Create(device, L"..\\media\\shader\\PostprocessPixelShader.hlsl", "main"))
@@ -286,16 +283,15 @@ void TiledRenderer::RenderPostprocess() const
 
         rtv = nullptr;
         deviceContext->OMSetRenderTargets(1, &rtv, nullptr);
-    });
+                   });
 }
 
 TiledRenderer::~TiledRenderer()
 {
     for (auto& thread : threads)
-        thread.execution = false;
+        thread.isRun = false;
 
-    mutexLock.unlock();
-    std::this_thread::yield();
+    beginTasksConditionVariable.notify_all();
 
     for (auto& thread : threads)
     {
@@ -369,8 +365,8 @@ void TiledRenderer::Update(float elapsedTime)
 
             const size_t trackIndex = (index % 2) ? 0 : 1;
             const DirectX::XMVECTOR position = DirectX::XMVectorLerp(track[trackIndex][currItem],
-                track[trackIndex][nextItem],
-                trackTime - floor(trackTime));
+                                                                     track[trackIndex][nextItem],
+                                                                     trackTime - floor(trackTime));
 
             DirectX::XMStoreFloat3(&spotLights[index].position, position);
             spotLights[index].direction = spotLights[index].position;
@@ -403,24 +399,23 @@ bool TiledRenderer::Resize(unsigned int argScreenWidth, unsigned int argScreenHe
     numSubSamples = argNumSubSamples;
 
     sceneRenderTarget.Destroy();
-    if (!sceneRenderTarget.Create(
-        device,
-        DXGI_FORMAT_R11G11B10_FLOAT,
-        ResourceBindFlags::RenderTargetBit | ResourceBindFlags::ShaderResourceBit,
-        screenWidth,
-        screenHeight,
-        1,
-        numSubSamples))
+    if (!sceneRenderTarget.Create(device,
+                                  DXGI_FORMAT_R11G11B10_FLOAT,
+                                  ResourceBindFlags::RenderTargetBit | ResourceBindFlags::ShaderResourceBit,
+                                  screenWidth,
+                                  screenHeight,
+                                  1,
+                                  numSubSamples))
         return false;
 
     sceneDepthStencilBuffer.Destroy();
     if (!sceneDepthStencilBuffer.Create(device,
-        DepthStencilBuffer::Format::Depth24_Stencil8,
-        screenWidth,
-        screenHeight,
-        1,
-        numSubSamples,
-        Texture::Dimension::Dimension2D))
+                                        DepthStencilBuffer::Format::Depth24_Stencil8,
+                                        screenWidth,
+                                        screenHeight,
+                                        1,
+                                        numSubSamples,
+                                        Texture::Dimension::Dimension2D))
         return false;
 
     if (!geometryPass.Resize(*this))
@@ -483,21 +478,12 @@ void TiledRenderer::FlushRenderTasks()
         return;
 
     taskIndex.store(0);
+    numFinishedTasks.store(0);
 
-    // Release the mutex lock so that the rendering task threads can run.
-    mutexLock.unlock();
+    beginTasksConditionVariable.notify_all();
 
-    while (true)
-    {
-        // Yields main thread CPU resources so that rendering task threads can be allocated CPU resources.
-        std::this_thread::yield();
-        mutexLock.lock();
-
-        if (taskIndex.load() < renderingTasks.size())
-            mutexLock.unlock();
-        else
-            break;
-    }
+    std::unique_lock<std::shared_mutex> lock(sharedMutex);
+    endTasksConditionVariable.wait(lock, [this] {return (numFinishedTasks.load() == renderingTasks.size()); });
 
     // Execute the recorded command list after all rendering tasks are completed.
     for (auto& task : renderingTasks)
@@ -514,17 +500,14 @@ void TiledRenderer::FlushRenderTasks()
 
 void TiledRenderer::RenderingThreadProc(RenderingThread& thread, TiledRenderer& renderer)
 {
-    while (thread.execution)
+    while (thread.isRun)
     {
-        // After the task is completed, yield CPU resources so that the main thread does not starve.
-        std::this_thread::yield();
-
-        // Wait for the mutex lock to be released on the main thread.
         std::shared_lock<std::shared_mutex> sharedLock(renderer.sharedMutex);
+        renderer.beginTasksConditionVariable.wait(sharedLock);
 
         while (true)
         {
-            const int taskIndex = renderer.taskIndex.fetch_add(1);
+            const int taskIndex = renderer.taskIndex++;
             if (taskIndex < renderer.renderingTasks.size())
             {
                 RenderingTask& task = renderer.renderingTasks[taskIndex];
@@ -532,6 +515,11 @@ void TiledRenderer::RenderingThreadProc(RenderingThread& thread, TiledRenderer& 
                 // Run rendering task and record command list of the rendering task.
                 task.task();
                 renderer.GetDeviceContext()->FinishCommandList(false, &task.commandList);
+
+                if (++renderer.numFinishedTasks == renderer.renderingTasks.size())
+                {
+                    renderer.endTasksConditionVariable.notify_one();
+                }
             }
             else
             {

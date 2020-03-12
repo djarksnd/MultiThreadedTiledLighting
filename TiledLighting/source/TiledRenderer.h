@@ -7,6 +7,7 @@
 #include <shared_mutex>
 #include <atomic>
 #include <vector>
+#include <condition_variable>
 
 #include "Object.h"
 #include "ConstantBuffer.h"
@@ -53,7 +54,7 @@ private:
         ID3D11DeviceContext* deferredContext = nullptr;
         std::thread thread;
         std::thread::id id;
-        bool execution = false;
+        bool isRun = false;
     };
 
     struct RenderingTask
@@ -200,7 +201,9 @@ private:
     mutable std::vector<RenderingTask> renderingTasks;
     std::vector<RenderingThread> threads;
     std::shared_mutex sharedMutex;
-    std::unique_lock<std::shared_mutex> mutexLock;
+    std::condition_variable_any beginTasksConditionVariable;
+    std::condition_variable_any endTasksConditionVariable;
     std::atomic_int taskIndex;
+    std::atomic_int numFinishedTasks;
     bool enableMultiThreadedRendering = true;
 };
