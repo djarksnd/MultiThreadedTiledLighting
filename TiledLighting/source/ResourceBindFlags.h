@@ -15,7 +15,7 @@ struct ResourceBindFlags
 		UnorderedAccessBit = 1 << 3,
 	};
 
-	ResourceBindFlags(unsigned int bitFlags)
+	ResourceBindFlags(unsigned int bitFlags /* = ResourceBindFlags::BitFlag */)
 	{
 		RenderTarget = bitFlags & RenderTargetBit;
 		DepthStencil = bitFlags & DepthStencilBit;

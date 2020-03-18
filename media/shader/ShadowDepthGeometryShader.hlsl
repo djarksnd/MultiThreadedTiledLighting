@@ -28,7 +28,7 @@ void main(triangle GS_Input input[3], inout TriangleStream<GS_Output> outStream)
 	{
 		GS_Output output[3];
 		
-		bool isInFront = false;
+		bool isItFront = false;
 	
 		for (uint vertex = 0; vertex < 3; ++vertex)
 		{
@@ -37,10 +37,10 @@ void main(triangle GS_Input input[3], inout TriangleStream<GS_Output> outStream)
 			output[vertex].texCoord = input[vertex].texCoord;
 
 			if (output[vertex].position.w > 0.0f)
-				isInFront = true;
+				isItFront = true;
 		}
 
-		if (isInFront)
+		if (isItFront)
 		{
 			for (uint vertex = 0; vertex < 3; ++vertex)
 				outStream.Append(output[vertex]);

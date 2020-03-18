@@ -106,6 +106,7 @@ public:
         return visualizeNumLights;
     }
     void SetEnableMultiThreadedRendering(bool enable) {
+        std::lock_guard<std::shared_mutex> lock(sharedMutex);
         enableMultiThreadedRendering = enable;
     }
     bool GetEnableMultiThreadedRendering() const {

@@ -220,22 +220,18 @@ void ShadowDepthBuffer::RenderPointLightShadowDepth(const TiledRenderer& rendere
 
     numCurrFramePointLightShadows = renderTargetIndex;
 
-	if (!renderer.GetEnableMultiThreadedRendering())
-	{
-        // restore d3d rendering states if not multi threaded rendering mode for next drawing steps.
-		ID3D11DeviceContext* deviceContext = renderer.GetDeviceContext();
-		deviceContext->VSSetShader(nullptr, nullptr, 0);
-		deviceContext->GSSetShader(nullptr, nullptr, 0);
-		deviceContext->PSSetShader(nullptr, nullptr, 0);
-		deviceContext->OMSetRenderTargets(0, nullptr, nullptr);
-		deviceContext->OMSetDepthStencilState(nullptr, 0);
-		deviceContext->RSSetState(nullptr);
-		ID3D11SamplerState* sampler = nullptr;
-		deviceContext->PSSetSamplers(0, 1, &sampler);
-		ID3D11Buffer* buffer = nullptr;
-		deviceContext->VSSetConstantBuffers(0, 1, &buffer);
-		deviceContext->GSSetConstantBuffers(0, 1, &buffer);
-	}
+    ID3D11DeviceContext* deviceContext = renderer.GetDeviceContext();
+    deviceContext->VSSetShader(nullptr, nullptr, 0);
+    deviceContext->GSSetShader(nullptr, nullptr, 0);
+    deviceContext->PSSetShader(nullptr, nullptr, 0);
+    deviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+    deviceContext->OMSetDepthStencilState(nullptr, 0);
+    deviceContext->RSSetState(nullptr);
+    ID3D11SamplerState* sampler = nullptr;
+    deviceContext->PSSetSamplers(0, 1, &sampler);
+    ID3D11Buffer* buffer = nullptr;
+    deviceContext->VSSetConstantBuffers(0, 1, &buffer);
+    deviceContext->GSSetConstantBuffers(0, 1, &buffer);
 }
 
 void ShadowDepthBuffer::RenderSpotLightShadowDepth(const TiledRenderer& renderer)
@@ -307,20 +303,16 @@ void ShadowDepthBuffer::RenderSpotLightShadowDepth(const TiledRenderer& renderer
 
     numCurrFrameSpotLightShadows = renderTargetIndex;
 
-	if (!renderer.GetEnableMultiThreadedRendering())
-	{
-        // restore d3d rendering states if not multi threaded rendering mode for next drawing steps.
-		ID3D11DeviceContext* deviceContext = renderer.GetDeviceContext();
-		deviceContext->VSSetShader(nullptr, nullptr, 0);
-		deviceContext->PSSetShader(nullptr, nullptr, 0);
-		deviceContext->OMSetRenderTargets(0, nullptr, nullptr);
-		deviceContext->OMSetDepthStencilState(nullptr, 0);
-		deviceContext->RSSetState(nullptr);
-		ID3D11SamplerState* sampler = nullptr;
-		deviceContext->PSSetSamplers(0, 1, &sampler);
-		ID3D11Buffer* buffers[] = { nullptr, nullptr };
-		deviceContext->VSSetConstantBuffers(0, ARRAYSIZE(buffers), buffers);
-	}
+    ID3D11DeviceContext* deviceContext = renderer.GetDeviceContext();
+    deviceContext->VSSetShader(nullptr, nullptr, 0);
+    deviceContext->PSSetShader(nullptr, nullptr, 0);
+    deviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+    deviceContext->OMSetDepthStencilState(nullptr, 0);
+    deviceContext->RSSetState(nullptr);
+    ID3D11SamplerState* sampler = nullptr;
+    deviceContext->PSSetSamplers(0, 1, &sampler);
+    ID3D11Buffer* buffers[] = { nullptr, nullptr };
+    deviceContext->VSSetConstantBuffers(0, ARRAYSIZE(buffers), buffers);
 }
 
 void ShadowDepthBuffer::Render(const TiledRenderer& renderer)

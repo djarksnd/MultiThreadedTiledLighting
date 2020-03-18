@@ -170,10 +170,12 @@ void TiledRenderer::InitLights()
         {
             light.position.x = 0.0f;
             light.position.y = 70.0f;
+
             if (index)
                 light.position.z = 210.0f;
             else
                 light.position.z = -140.0f;
+
             light.color.x = MathHelper::Lerp(0.15f, 1.5f, static_cast<float>(dist(gen)) / 1024.0f);
             light.color.y = MathHelper::Lerp(0.15f, 1.5f, static_cast<float>(dist(gen)) / 1024.0f);
             light.color.z = MathHelper::Lerp(0.15f, 1.5f, static_cast<float>(dist(gen)) / 1024.0f);

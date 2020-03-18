@@ -26,6 +26,7 @@ PS_OUTPUT main(PS_INPUT input)
 	const float4 diffuse = diffuseTexture.Sample(texSampler, input.texcoord);
 	const float specularIntensity = 0.1f;
 	const float glossiness = 60.0f;
+
 #if AlphaTestEnable
 	clip(diffuse.a - 0.333f);
 #endif

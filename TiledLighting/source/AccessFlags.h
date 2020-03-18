@@ -11,7 +11,7 @@ struct AccessFlags
 		writeBit = 1 << 1,
 	};
 
-	AccessFlags(unsigned int bitFlags)
+	AccessFlags(unsigned int bitFlags /* = AccessFlags::BitFlag */)
 	{
 		read = bitFlags & readBit;
 		write = bitFlags & writeBit;

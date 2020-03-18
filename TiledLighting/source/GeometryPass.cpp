@@ -176,25 +176,21 @@ void GeometryPass::Render(const TiledRenderer& renderer)
 			object->Render(deviceContext, frustum);
 		}
 
-		if (!renderer.GetEnableMultiThreadedRendering())
-		{
-            // restore d3d rendering states if not multi threaded rendering mode for next drawing steps.
-			for (auto& rtv : rtvs)
-				rtv = nullptr;
+        for (auto& rtv : rtvs)
+            rtv = nullptr;
 
-			deviceContext->OMSetRenderTargets(ARRAYSIZE(rtvs), rtvs, nullptr);
-			deviceContext->OMSetDepthStencilState(nullptr, 0);
-			deviceContext->RSSetState(nullptr);
-			deviceContext->IASetInputLayout(nullptr);
+		deviceContext->OMSetRenderTargets(ARRAYSIZE(rtvs), rtvs, nullptr);
+		deviceContext->OMSetDepthStencilState(nullptr, 0);
+		deviceContext->RSSetState(nullptr);
+		deviceContext->IASetInputLayout(nullptr);
 
-			deviceContext->VSSetShader(nullptr, nullptr, 0);
-			deviceContext->PSSetShader(nullptr, nullptr, 0);
+		deviceContext->VSSetShader(nullptr, nullptr, 0);
+		deviceContext->PSSetShader(nullptr, nullptr, 0);
 
-			sampler = nullptr;
-			deviceContext->PSSetSamplers(0, 1, &sampler);
+		sampler = nullptr;
+		deviceContext->PSSetSamplers(0, 1, &sampler);
 
-			ID3D11Buffer* buffers[2] = { nullptr };
-			deviceContext->VSSetConstantBuffers(0, 2, buffers);
-		}
+		ID3D11Buffer* buffers[2] = { nullptr };
+		deviceContext->VSSetConstantBuffers(0, 2, buffers);
 	});
 }

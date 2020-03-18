@@ -337,24 +337,20 @@ void LightPass::RenderLights(const TiledRenderer& renderer)
 
     renderer.DrawScreenAlignQuad();
 
-    if (!renderer.GetEnableMultiThreadedRendering())
-    {
-        // restore d3d rendering states if not multi threaded rendering mode for next drawing steps.
-        for (auto& srv : srvs)
-            srv = nullptr;
+    for (auto& srv : srvs)
+        srv = nullptr;
 
-        deviceContext->PSSetShaderResources(0, ARRAYSIZE(srvs), srvs);
+    deviceContext->PSSetShaderResources(0, ARRAYSIZE(srvs), srvs);
 
-        sampler = nullptr;
-        deviceContext->PSSetSamplers(0, 1, &sampler);
+    sampler = nullptr;
+    deviceContext->PSSetSamplers(0, 1, &sampler);
 
-        buffer = nullptr;
-        deviceContext->PSSetConstantBuffers(0, 1, &buffer);
-        deviceContext->PSSetShader(nullptr, nullptr, 0);
+    buffer = nullptr;
+    deviceContext->PSSetConstantBuffers(0, 1, &buffer);
+    deviceContext->PSSetShader(nullptr, nullptr, 0);
 
-        rtv = nullptr;
-        deviceContext->OMSetRenderTargets(1, &rtv, nullptr);
-        deviceContext->OMSetDepthStencilState(nullptr, 0);
-        deviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff);
-    }
+    rtv = nullptr;
+    deviceContext->OMSetRenderTargets(1, &rtv, nullptr);
+    deviceContext->OMSetDepthStencilState(nullptr, 0);
+    deviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff);
 }
