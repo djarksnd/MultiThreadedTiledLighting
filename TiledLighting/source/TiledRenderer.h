@@ -63,13 +63,15 @@ private:
         std::function<void()> task;
     };
 
-    class AutoRenderingTaskcompletionNotifier
+    class AutoRenderingTaskCompletionNotifier
     {
     public:
-        AutoRenderingTaskcompletionNotifier(TiledRenderer& _renderer) : renderer(_renderer) {}
-        ~AutoRenderingTaskcompletionNotifier()
+        AutoRenderingTaskCompletionNotifier(TiledRenderer& _renderer, const size_t _numRenderingTasks)
+            : renderer(_renderer), numRenderingTasks(_numRenderingTasks) {}
+
+        ~AutoRenderingTaskCompletionNotifier()
         {
-            if (++renderer.numCompletedRenderingTasks == renderer.renderingTasks.size())
+            if (++renderer.numCompletedRenderingTasks == numRenderingTasks)
             {
                 renderer.conditionVariableToWaitRenderingThreads.notify_one();
             }
@@ -77,6 +79,7 @@ private:
 
     private:
         TiledRenderer& renderer;
+        const size_t numRenderingTasks;
     };
 
 public:
@@ -215,9 +218,9 @@ private:
     size_t numSpotLightLimit = NumMaxSpotLights / 2;
     ViewInfo viewInfo;
     AABBox sceneBound;
-    mutable std::vector<RenderingTask> renderingTasks;
     std::vector<RenderingThread> threads;
-    std::shared_mutex sharedMutex;
+    mutable std::vector<RenderingTask> renderingTasks;
+    mutable std::shared_mutex sharedMutex;
     std::condition_variable_any conditionVariableToWakeUpRenderingThreads;
     std::condition_variable_any conditionVariableToWaitRenderingThreads;
     std::atomic_int taskIndex = 0;

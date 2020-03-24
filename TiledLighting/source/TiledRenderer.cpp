@@ -290,8 +290,11 @@ void TiledRenderer::RenderPostprocess() const
 
 TiledRenderer::~TiledRenderer()
 {
-    for (auto& thread : threads)
-        thread.run = false;
+    {
+        std::lock_guard<std::shared_mutex> lock(sharedMutex);
+        for (auto& thread : threads)
+            thread.run = false;
+    }
 
     conditionVariableToWakeUpRenderingThreads.notify_all();
 
@@ -437,7 +440,10 @@ void TiledRenderer::DrawScreenAlignQuad() const
 void TiledRenderer::PostRenderTask(const std::function<void()>& task) const
 {
     if (enableMultiThreadedRendering)
+    {
+        std::lock_guard<std::shared_mutex> lock(sharedMutex);
         renderingTasks.push_back(RenderingTask{ nullptr, task });
+    }
     else
         task();
 }
@@ -476,9 +482,6 @@ void TiledRenderer::Render(const CBaseCamera& camera)
 
 void TiledRenderer::FlushRenderTasks()
 {
-    if (renderingTasks.empty())
-        return;
-
     taskIndex.store(0);
     numCompletedRenderingTasks.store(0);
 
@@ -514,7 +517,7 @@ void TiledRenderer::RenderingThreadProc(RenderingThread& thread, TiledRenderer& 
             {
                 // I use stack object for notify.
                 // It prevent main thread blocking when rendering threads crashed during running rendering task.
-                AutoRenderingTaskcompletionNotifier notifier(renderer);
+                AutoRenderingTaskCompletionNotifier notifier(renderer, renderer.renderingTasks.size());
 
                 // Run rendering task and record command list of the rendering task.
                 RenderingTask& task = renderer.renderingTasks[taskIndex];
