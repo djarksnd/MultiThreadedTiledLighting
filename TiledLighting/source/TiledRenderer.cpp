@@ -87,7 +87,7 @@ bool TiledRenderer::Create(ID3D11Device* argDevice, ID3D11DeviceContext* argImme
             if (FAILED(device->CreateDeferredContext(0, &thread.deferredContext)))
                 return false;
 
-            thread.isRun = true;
+            thread.run = true;
             thread.thread = std::thread(RenderingThreadProc, std::ref(thread), std::ref(*this));
             thread.id = thread.thread.get_id();
         }
@@ -291,9 +291,9 @@ void TiledRenderer::RenderPostprocess() const
 TiledRenderer::~TiledRenderer()
 {
     for (auto& thread : threads)
-        thread.isRun = false;
+        thread.run = false;
 
-    beginTasksConditionVariable.notify_all();
+    conditionVariableToWakeUpRenderingThreads.notify_all();
 
     for (auto& thread : threads)
     {
@@ -480,12 +480,12 @@ void TiledRenderer::FlushRenderTasks()
         return;
 
     taskIndex.store(0);
-    numFinishedTasks.store(0);
+    numCompletedRenderingTasks.store(0);
 
-    beginTasksConditionVariable.notify_all();
+    conditionVariableToWakeUpRenderingThreads.notify_all();
 
     std::unique_lock<std::shared_mutex> lock(sharedMutex);
-    endTasksConditionVariable.wait(lock, [this] {return (numFinishedTasks.load() == renderingTasks.size()); });
+    conditionVariableToWaitRenderingThreads.wait(lock,[this] {return (numCompletedRenderingTasks.load() == renderingTasks.size()); });
 
     // Execute the recorded command list after all rendering tasks are completed.
     for (auto& task : renderingTasks)
@@ -502,26 +502,24 @@ void TiledRenderer::FlushRenderTasks()
 
 void TiledRenderer::RenderingThreadProc(RenderingThread& thread, TiledRenderer& renderer)
 {
-    while (thread.isRun)
+    while (thread.run)
     {
         std::shared_lock<std::shared_mutex> sharedLock(renderer.sharedMutex);
-        renderer.beginTasksConditionVariable.wait(sharedLock);
+        renderer.conditionVariableToWakeUpRenderingThreads.wait(sharedLock);
 
         while (true)
         {
             const int taskIndex = renderer.taskIndex++;
             if (taskIndex < renderer.renderingTasks.size())
             {
-                RenderingTask& task = renderer.renderingTasks[taskIndex];
+                // I use stack object for notify.
+                // It prevent main thread blocking when rendering threads crashed during running rendering task.
+                AutoRenderingTaskcompletionNotifier notifier(renderer);
 
                 // Run rendering task and record command list of the rendering task.
+                RenderingTask& task = renderer.renderingTasks[taskIndex];
                 task.task();
                 renderer.GetDeviceContext()->FinishCommandList(false, &task.commandList);
-
-                if (++renderer.numFinishedTasks == renderer.renderingTasks.size())
-                {
-                    renderer.endTasksConditionVariable.notify_one();
-                }
             }
             else
             {

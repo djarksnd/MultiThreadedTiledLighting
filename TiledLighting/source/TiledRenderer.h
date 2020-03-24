@@ -54,13 +54,29 @@ private:
         ID3D11DeviceContext* deferredContext = nullptr;
         std::thread thread;
         std::thread::id id;
-        bool isRun = false;
+        bool run = false;
     };
 
     struct RenderingTask
     {
         ID3D11CommandList* commandList;
         std::function<void()> task;
+    };
+
+    class AutoRenderingTaskcompletionNotifier
+    {
+    public:
+        AutoRenderingTaskcompletionNotifier(TiledRenderer& _renderer) : renderer(_renderer) {}
+        ~AutoRenderingTaskcompletionNotifier()
+        {
+            if (++renderer.numCompletedRenderingTasks == renderer.renderingTasks.size())
+            {
+                renderer.conditionVariableToWaitRenderingThreads.notify_one();
+            }
+        }
+
+    private:
+        TiledRenderer& renderer;
     };
 
 public:
@@ -202,9 +218,9 @@ private:
     mutable std::vector<RenderingTask> renderingTasks;
     std::vector<RenderingThread> threads;
     std::shared_mutex sharedMutex;
-    std::condition_variable_any beginTasksConditionVariable;
-    std::condition_variable_any endTasksConditionVariable;
-    std::atomic_int taskIndex;
-    std::atomic_int numFinishedTasks;
+    std::condition_variable_any conditionVariableToWakeUpRenderingThreads;
+    std::condition_variable_any conditionVariableToWaitRenderingThreads;
+    std::atomic_int taskIndex = 0;
+    std::atomic_int numCompletedRenderingTasks = 0;
     bool enableMultiThreadedRendering = true;
 };
