@@ -517,7 +517,7 @@ void TiledRenderer::RenderingThreadProc(RenderingThread& thread, TiledRenderer& 
             {
                 // I use stack object for notify.
                 // It prevent main thread blocking when rendering threads crashed during running rendering task.
-                AutoRenderingTaskCompletionNotifier notifier(renderer, renderer.renderingTasks.size());
+                AutoRenderingTaskCompletionNotifier notifier(renderer);
 
                 // Run rendering task and record command list of the rendering task.
                 RenderingTask& task = renderer.renderingTasks[taskIndex];

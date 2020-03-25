@@ -66,20 +66,15 @@ private:
     class AutoRenderingTaskCompletionNotifier
     {
     public:
-        AutoRenderingTaskCompletionNotifier(TiledRenderer& _renderer, const size_t _numRenderingTasks)
-            : renderer(_renderer), numRenderingTasks(_numRenderingTasks) {}
-
+        AutoRenderingTaskCompletionNotifier(TiledRenderer& _renderer) : renderer(_renderer) {}
         ~AutoRenderingTaskCompletionNotifier()
         {
-            if (++renderer.numCompletedRenderingTasks == numRenderingTasks)
-            {
+            if (++renderer.numCompletedRenderingTasks == renderer.renderingTasks.size())
                 renderer.conditionVariableToWaitRenderingThreads.notify_one();
-            }
         }
 
     private:
         TiledRenderer& renderer;
-        const size_t numRenderingTasks;
     };
 
 public:
