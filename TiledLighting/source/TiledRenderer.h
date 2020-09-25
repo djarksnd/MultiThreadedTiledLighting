@@ -66,7 +66,7 @@ private:
     class AutoRenderingTaskCompletionNotifier
     {
     public:
-        AutoRenderingTaskCompletionNotifier(TiledRenderer& _renderer) : renderer(_renderer) {}
+        AutoRenderingTaskCompletionNotifier(TiledRenderer& argRenderer) : renderer(argRenderer) {}
         ~AutoRenderingTaskCompletionNotifier()
         {
             if (++renderer.numCompletedRenderingTasks == renderer.renderingTasks.size())
@@ -78,7 +78,7 @@ private:
     };
 
 public:
-    TiledRenderer() {}
+    TiledRenderer();
     ~TiledRenderer();
 
     bool Create(ID3D11Device* device, ID3D11DeviceContext* immediateContext,

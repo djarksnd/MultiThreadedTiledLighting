@@ -6,9 +6,9 @@
 
 
 
-bool GeometryPass::Create(const TiledRenderer& renderer)
+bool GeometryPass::Create()
 {
-	if (!Resize(renderer))
+	if (!Resize())
 		return false;
 
 	D3D11_DEPTH_STENCIL_DESC dsDesc;
@@ -74,7 +74,7 @@ bool GeometryPass::Create(const TiledRenderer& renderer)
 	return true;
 }
 
-bool GeometryPass::Resize(const TiledRenderer& renderer)
+bool GeometryPass::Resize()
 {
 	renderTargets[BufferType::DiffuseSpecular].Destroy();
 	if (!renderTargets[BufferType::DiffuseSpecular].Create(renderer.GetDevice(),
@@ -115,10 +115,10 @@ bool GeometryPass::Resize(const TiledRenderer& renderer)
 	return true;
 }
 
-void GeometryPass::Render(const TiledRenderer& renderer)
+void GeometryPass::Render()
 {
     // Drawing geometry buffer.
-	renderer.PostRenderTask([this, &renderer]() {
+	renderer.PostRenderTask([this]() {
 		ID3D11DeviceContext* deviceContext = renderer.GetDeviceContext();
 
 		D3D11_VIEWPORT viewPort;
@@ -194,3 +194,7 @@ void GeometryPass::Render(const TiledRenderer& renderer)
 		deviceContext->VSSetConstantBuffers(0, 2, buffers);
 	});
 }
+
+GeometryPass::GeometryPass(const TiledRenderer& argRenderer)
+: renderer(argRenderer)
+{}

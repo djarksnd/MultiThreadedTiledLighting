@@ -23,18 +23,14 @@ struct VertexShaderPerLightCBuffer
 };
 #pragma pack(pop)
 
-bool ShadowDepthBuffer::Create(const TiledRenderer& renderer,
-							   unsigned int argBufferResolution)
-{
-	if (!pointLightShadowDepthBuffer.Create(renderer.GetDevice(), DepthStencilBuffer::Format::Depth32,
-		argBufferResolution, argBufferResolution,
-		NumMaxPointLightShadows * 6, 1, Texture::Dimension::Dimension2D))
-		return false;
+ShadowDepthBuffer::ShadowDepthBuffer(const TiledRenderer& argRenderer)
+: renderer(argRenderer)
+{}
 
-	if (!spotLightShadowDepthBuffer.Create(renderer.GetDevice(), DepthStencilBuffer::Format::Depth32,
-		argBufferResolution, argBufferResolution,
-		NumMaxSpotLightShadows, 1, Texture::Dimension::Dimension2D))
-		return false;
+bool ShadowDepthBuffer::Create(unsigned int argBufferResolution)
+{
+    if (!Resize(argBufferResolution))
+        return false;
 
 	if (!vertexShaderPerObjectCBuffer.Create(renderer.GetDevice(), sizeof(DirectX::XMMATRIX)))
 		return false;
@@ -126,9 +122,28 @@ bool ShadowDepthBuffer::Create(const TiledRenderer& renderer,
 	if (!samplerState.Create(renderer.GetDevice(), ssDesc))
 		return false;
 
-	bufferResolution = static_cast<float>(argBufferResolution);
-
 	return true;
+}
+
+bool ShadowDepthBuffer::Resize(unsigned int argBufferResolution)
+{
+    pointLightShadowDepthBuffer.Destroy();
+
+    if (!pointLightShadowDepthBuffer.Create(renderer.GetDevice(), DepthStencilBuffer::Format::Depth32,
+                                            argBufferResolution, argBufferResolution,
+                                            NumMaxPointLightShadows * 6, 1, Texture::Dimension::Dimension2D))
+        return false;
+
+    spotLightShadowDepthBuffer.Destroy();
+
+    if (!spotLightShadowDepthBuffer.Create(renderer.GetDevice(), DepthStencilBuffer::Format::Depth32,
+                                           argBufferResolution, argBufferResolution,
+                                           NumMaxSpotLightShadows, 1, Texture::Dimension::Dimension2D))
+        return false;
+
+    bufferResolution = static_cast<float>(argBufferResolution);
+
+    return true;
 }
 
 void ShadowDepthBuffer::SetNumPointLightShadowLimit(size_t num)
@@ -141,7 +156,7 @@ void ShadowDepthBuffer::SetNumSpotLightShadowLimit(size_t num)
 	numSpotLightShadowLimit = MathHelper::Clamp<size_t>(num, 0, NumMaxSpotLightShadows);
 }
 
-void ShadowDepthBuffer::RenderPointLightShadowDepth(const TiledRenderer& renderer)
+void ShadowDepthBuffer::RenderPointLightShadowDepth()
 {
 	const Frustum frustum(renderer.GetViewInfo().invViewProjectionMatrix);
     size_t numShadows = MathHelper::Min(numPointLightShadowLimit, renderer.GetNumPointLightLimit());
@@ -152,7 +167,7 @@ void ShadowDepthBuffer::RenderPointLightShadowDepth(const TiledRenderer& rendere
 		if (!frustum.CollisionCheck(DirectX::XMLoadFloat3(&light.position), light.radius))
 			continue;
 
-		renderer.PostRenderTask([this, &renderer, &light, renderTargetIndex]() {
+		renderer.PostRenderTask([this, &light, renderTargetIndex]() {
 			ID3D11DeviceContext* deviceContext = renderer.GetDeviceContext();
 
 			deviceContext->IASetInputLayout(pointLightVertexShader.GetInputLayout());
@@ -234,7 +249,7 @@ void ShadowDepthBuffer::RenderPointLightShadowDepth(const TiledRenderer& rendere
     deviceContext->GSSetConstantBuffers(0, 1, &buffer);
 }
 
-void ShadowDepthBuffer::RenderSpotLightShadowDepth(const TiledRenderer& renderer)
+void ShadowDepthBuffer::RenderSpotLightShadowDepth()
 {
     const size_t numShadows = MathHelper::Min(numSpotLightShadowLimit, renderer.GetNumSpotLightLimit());
 	const Frustum frustum(renderer.GetViewInfo().invViewProjectionMatrix);
@@ -245,7 +260,7 @@ void ShadowDepthBuffer::RenderSpotLightShadowDepth(const TiledRenderer& renderer
 		if (!frustum.CollisionCheck(DirectX::XMLoadFloat3(&light.position), light.radius))
 			continue;
 
-		renderer.PostRenderTask([this, &renderer, &light, renderTargetIndex]() {
+		renderer.PostRenderTask([this, &light, renderTargetIndex]() {
 			ID3D11DeviceContext* deviceContext = renderer.GetDeviceContext();
 
 			deviceContext->IASetInputLayout(spotLightVertexShader.GetInputLayout());
@@ -315,12 +330,12 @@ void ShadowDepthBuffer::RenderSpotLightShadowDepth(const TiledRenderer& renderer
     deviceContext->VSSetConstantBuffers(0, ARRAYSIZE(buffers), buffers);
 }
 
-void ShadowDepthBuffer::Render(const TiledRenderer& renderer)
+void ShadowDepthBuffer::Render()
 {
 	ID3D11DeviceContext* deviceContext = renderer.GetDeviceContext();
 	pointLightShadowDepthBuffer.Clear(deviceContext, 0.0f, 0);
 	spotLightShadowDepthBuffer.Clear(deviceContext, 0.0f, 0);
 
-	RenderPointLightShadowDepth(renderer);
-	RenderSpotLightShadowDepth(renderer);
+	RenderPointLightShadowDepth();
+	RenderSpotLightShadowDepth();
 }

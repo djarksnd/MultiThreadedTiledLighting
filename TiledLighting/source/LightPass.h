@@ -17,19 +17,19 @@ class TiledRenderer;
 class LightPass
 {
 public:
-	bool Create(const TiledRenderer& renderer);
-	bool Resize(const TiledRenderer& renderer);
-	void Render(const TiledRenderer& renderer);
+	bool Create();
+	bool Resize();
+	void Render();
 
-	LightPass() {}
+	LightPass(const TiledRenderer& renderer);
 	LightPass(const LightPass&) = delete;
 	const LightPass& operator = (const LightPass&) = delete;
 
 private:
     // Cull lights with compute shader and screen align tile's frustums.
-	void CullLights(const TiledRenderer& renderer);
+	void CullLights();
     // Calculate lighting with gbuffers and gpu lights culling results to scene color buffer.
-	void RenderLights(const TiledRenderer& renderer);
+	void RenderLights();
 
 	static constexpr unsigned int NumMaxPointLightsPerTile = 128;
 	static constexpr unsigned int NumMaxSpotLightsPerTile = 128;
@@ -44,6 +44,7 @@ private:
 	}
 
 private:
+    const TiledRenderer& renderer;
 	ComputeShader lightCullingComputeShader;
 	ConstantBuffer lightCullingCSCBuffer;
 	Buffer pointLightBuffer;

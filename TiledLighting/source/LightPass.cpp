@@ -36,9 +36,9 @@ struct DeferredLightingPSCBuffer
 };
 #pragma pack(pop)
 
-bool LightPass::Create(const TiledRenderer& renderer)
+bool LightPass::Create()
 {
-    if (!Resize(renderer))
+    if (!Resize())
         return false;
 
     if (!pointLightBuffer.Create(renderer.GetDevice(), DXGI_FORMAT_UNKNOWN,
@@ -143,7 +143,7 @@ bool LightPass::Create(const TiledRenderer& renderer)
     return true;
 }
 
-bool LightPass::Resize(const TiledRenderer& renderer)
+bool LightPass::Resize()
 {
     lightIndexBuffer.Destroy();
 
@@ -161,18 +161,22 @@ bool LightPass::Resize(const TiledRenderer& renderer)
     return true;
 }
 
-void LightPass::Render(const TiledRenderer& renderer)
+void LightPass::Render()
 {
-    renderer.PostRenderTask([this, &renderer]() {
+    renderer.PostRenderTask([this]() {
         // Cull lights with compute shader and screen align tile's frustums.
-        CullLights(renderer);
+        CullLights();
 
         // Calculate lighting with gbuffers and gpu lights culling results to scene color buffer.
-        RenderLights(renderer);
+        RenderLights();
         });
 }
 
-void LightPass::CullLights(const TiledRenderer& renderer)
+LightPass::LightPass(const TiledRenderer& argRenderer)
+ : renderer(argRenderer)
+{}
+
+void LightPass::CullLights()
 {
     // Cull lights with compute shader and screen align tile's frustums.
 
@@ -251,7 +255,7 @@ void LightPass::CullLights(const TiledRenderer& renderer)
     deviceContext->CSSetShader(nullptr, nullptr, 0);
 }
 
-void LightPass::RenderLights(const TiledRenderer& renderer)
+void LightPass::RenderLights()
 {
     // Calculate lighting with gbuffers and gpu lights culling results to scene color buffer.
     ID3D11DeviceContext* deviceContext = renderer.GetDeviceContext();

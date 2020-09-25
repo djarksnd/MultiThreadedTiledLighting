@@ -36,20 +36,20 @@ public:
 	};
 
 public:
-	GeometryPass() {}
-
-	bool Create(const TiledRenderer& renderer);
-	bool Resize(const TiledRenderer& renderer);
-	void Render(const TiledRenderer& renderer);
+	bool Create();
+	bool Resize();
+	void Render();
 
 	const RenderTarget& GetBuffer(BufferType::Type type) const{
 		return renderTargets[type];
 	}
 
+    GeometryPass(const TiledRenderer& renderer);
 	GeometryPass(const GeometryPass&) = delete;
 	const GeometryPass& operator = (const GeometryPass&) = delete;
 
 private:
+    const TiledRenderer& renderer;
 	std::array<RenderTarget, BufferType::NumTypes> renderTargets;
 	RasterizerState rasterizerState;
 	DepthStencilState depthStencilState;

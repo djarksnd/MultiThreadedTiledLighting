@@ -18,10 +18,9 @@ public:
 	constexpr static size_t NumMaxSpotLightShadows = 8;
 
 public:
-    ShadowDepthBuffer() {}
-
-	bool Create(const TiledRenderer& renderer, unsigned int bufferResolution);
-	void Render(const TiledRenderer& renderer);
+	bool Create(unsigned int bufferResolution);
+    bool Resize(unsigned int bufferResolution);
+	void Render();
 	void SetNumPointLightShadowLimit(size_t num);
 	void SetNumSpotLightShadowLimit(size_t num);
 
@@ -44,11 +43,16 @@ public:
 		return numCurrFrameSpotLightShadows;
 	}
 
-private:
-	void RenderPointLightShadowDepth(const TiledRenderer& renderer);
-	void RenderSpotLightShadowDepth(const TiledRenderer& renderer);
+    ShadowDepthBuffer(const TiledRenderer& renderer);
+    ShadowDepthBuffer(const ShadowDepthBuffer&) = delete;
+    const ShadowDepthBuffer& operator = (const ShadowDepthBuffer&) = delete;
 
 private:
+	void RenderPointLightShadowDepth();
+	void RenderSpotLightShadowDepth();
+
+private:
+    const TiledRenderer& renderer;
 	DepthStencilBuffer pointLightShadowDepthBuffer;
 	DepthStencilBuffer spotLightShadowDepthBuffer;
 	ConstantBuffer vertexShaderPerObjectCBuffer;

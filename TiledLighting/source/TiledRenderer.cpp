@@ -127,13 +127,13 @@ bool TiledRenderer::Create(ID3D11Device* argDevice, ID3D11DeviceContext* argImme
     InitObjects();
     InitLights();
 
-    if (!geometryPass.Create(*this))
+    if (!geometryPass.Create())
         return false;
 
-    if (!shadowDepthBuffer.Create(*this, 512))
+    if (!shadowDepthBuffer.Create(512))
         return false;
 
-    if (!lightPass.Create(*this))
+    if (!lightPass.Create())
         return false;
 
     return true;
@@ -288,6 +288,12 @@ void TiledRenderer::RenderPostprocess() const
                    });
 }
 
+TiledRenderer::TiledRenderer()
+: geometryPass(*this)
+, shadowDepthBuffer(*this)
+, lightPass(*this)
+{}
+
 TiledRenderer::~TiledRenderer()
 {
     {
@@ -423,10 +429,10 @@ bool TiledRenderer::Resize(unsigned int argScreenWidth, unsigned int argScreenHe
                                         Texture::Dimension::Dimension2D))
         return false;
 
-    if (!geometryPass.Resize(*this))
+    if (!geometryPass.Resize())
         return false;
 
-    if (!lightPass.Resize(*this))
+    if (!lightPass.Resize())
         return false;
 
     return true;
@@ -464,14 +470,14 @@ void TiledRenderer::Render(const CBaseCamera& camera)
     sceneDepthStencilBuffer.Clear(GetDeviceContext(), 0.0f, 0);
 
     // Write geometry data of objects to geometry buffer.
-    geometryPass.Render(*this);
+    geometryPass.Render();
 
     // Draw shadow depth before performing drawing lights.
-    shadowDepthBuffer.Render(*this);
+    shadowDepthBuffer.Render();
 
     // Draw lights using geometry buffers and shadow depth buffer.
     // This function also uses the compute shader to culling the lights before drawing them.
-    lightPass.Render(*this);
+    lightPass.Render();
 
     // Perform gamma operation and print the scene color to the back buffer.
     RenderPostprocess();
