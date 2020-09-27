@@ -87,7 +87,7 @@ bool TiledRenderer::Create(ID3D11Device* argDevice, ID3D11DeviceContext* argImme
             if (FAILED(device->CreateDeferredContext(0, &thread.deferredContext)))
                 return false;
 
-            thread.run = true;
+            thread.running = true;
             thread.thread = std::thread(RenderingThreadProc, std::ref(thread), std::ref(*this));
             thread.id = thread.thread.get_id();
         }
@@ -299,7 +299,7 @@ TiledRenderer::~TiledRenderer()
     {
         std::lock_guard<std::shared_mutex> lock(sharedMutex);
         for (auto& thread : threads)
-            thread.run = false;
+            thread.running = false;
     }
 
     conditionVariableToWakeUpRenderingThreads.notify_all();
@@ -511,7 +511,7 @@ void TiledRenderer::FlushRenderTasks()
 
 void TiledRenderer::RenderingThreadProc(RenderingThread& thread, TiledRenderer& renderer)
 {
-    while (thread.run)
+    while (thread.running)
     {
         std::shared_lock<std::shared_mutex> sharedLock(renderer.sharedMutex);
         renderer.conditionVariableToWakeUpRenderingThreads.wait(sharedLock);

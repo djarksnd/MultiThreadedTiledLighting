@@ -10,24 +10,24 @@ namespace MathHelper
 	constexpr float Float_Min = 1.175494351e-38F;
 
 	constexpr float
-		DegreeToRadian(float _degree)
+		DegreeToRadian(float degree)
 	{
-		return _degree * (PI / 180.f);
+		return degree * (PI / 180.f);
 	}
 
 	constexpr float
-		RadianToDegree(float _radian)
+		RadianToDegree(float radian)
 	{
-		return _radian * (180.f / PI);
+		return radian * (180.f / PI);
 	}
 
-	constexpr bool
-		FloatIsNearlyZero(float a)
-	{
-		return (a < FloatEpsilon && a > -FloatEpsilon);
-	}
+    constexpr bool
+        FloatIsNearlyZero(float a)
+    {
+        return ((a < FloatEpsilon) && (a > -FloatEpsilon));
+    }
 
-	constexpr bool
+    constexpr bool
 		FloatsAreEqual(float a, float b)
 	{
 		return (FloatIsNearlyZero(a - b));
@@ -37,14 +37,14 @@ namespace MathHelper
 	constexpr const T
 		Max(const T& lhs, const T& rhs)
 	{
-		return lhs > rhs ? lhs : rhs;
+		return (lhs > rhs) ? lhs : rhs;
 	}
 
 	template<typename T>
 	constexpr const T
 		Min(const T& lhs, const T& rhs)
 	{
-		return lhs < rhs ? lhs : rhs;
+		return (lhs < rhs) ? lhs : rhs;
 	}
 
 	template<typename T>

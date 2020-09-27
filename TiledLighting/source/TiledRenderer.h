@@ -54,7 +54,7 @@ private:
         ID3D11DeviceContext* deferredContext = nullptr;
         std::thread thread;
         std::thread::id id;
-        bool run = false;
+        bool running = false;
     };
 
     struct RenderingTask
