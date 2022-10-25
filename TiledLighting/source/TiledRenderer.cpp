@@ -78,7 +78,8 @@ bool TiledRenderer::Create(ID3D11Device* argDevice, ID3D11DeviceContext* argImme
     immediateContext = argImmediateContext;
     immediateContext->AddRef();
 
-    const size_t NumRenderingThreads = GetLogicalProcessorCount();
+    const size_t NumMaxRenderingThreads = 13;
+    const size_t NumRenderingThreads = min(GetLogicalProcessorCount(), NumMaxRenderingThreads);
     if (NumRenderingThreads > 0)
     {
         threads.resize(NumRenderingThreads);
