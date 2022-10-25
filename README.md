@@ -46,14 +46,13 @@ DirectX11의 [DeferredContext](https://docs.microsoft.com/en-us/windows/win32/di
             -   ShadowDepthBuffer::RenderPointLightShadowDepth
 
 ## Files
-이 포트폴리오는 실행파일을 빌드 할 수 있는 프로젝트 파일과(Visual Studio 2017 & 2019) 빌드된 바이너리 파일을 포함합니다.
+이 포트폴리오는 실행파일을 빌드 할 수 있는 솔루션 파일과(Visual Studio 2019) 빌드된 바이너리 파일을 포함합니다.
 
 -   `bin` _실행 가능한 바이너리 파일 폴더_
     -   `TiledLighting_x64_release.exe` _실행 가능한 바이너리 파일(Windows 64bit only / 바이너리 파일 실행 시 추가 DLL이 필요할 수 있습니다.)_
 -   `dxut` _DXUT프로젝트 폴더 (포트폴리오 빌드 시 필요)_
 -   `media` _포트폴리오 데이터 폴더(쉐이더 코드 & 그래픽 데이터)_
 -   `TiledLighting` _C++ 소스코드 및 프로젝트 파일 폴더_
--   `TiledLighting_VS2017_Win10.sln` _Visual Studio 2017 솔루션 파일_
 -   `TiledLighting_VS2019_Win10.sln` _Visual Studio 2019 솔루션 파일_
 
 ## Download Release
@@ -62,5 +61,7 @@ DirectX11의 [DeferredContext](https://docs.microsoft.com/en-us/windows/win32/di
 -   빌드과정 없이 포트폴리오를 실행하려면 아래 링크된 파일을 내려받으시면 됩니다.
     -   릴리즈된 바이너리는 Windows 64bit 전용 입니다.
     -   내려받은 파일의 압축을 푼 후 bin폴더의 TiledLighting_x64_release.exe를 실행하세요.
+        -   카메라 이동은 a, s, d, w 키를 사용하세요.
+        -   카메라 회전은 마우스 좌버튼을 누른 채 마우스를 회전하세요.
     -   MultiThreadedTiledLighting.zip
         -   [https://github.com/djarksnd/MultiThreadedTiledLighting/releases/download/1.0/MultiThreadedTiledLighting.zip](https://github.com/djarksnd/MultiThreadedTiledLighting/releases/download/1.0/MultiThreadedTiledLighting.zip)
