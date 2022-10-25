@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: DXUT.h
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=320437
@@ -51,16 +51,18 @@
 #define NOMINMAX
 #endif
 
-#include <windows.h>
+#include <cassert>
+#include <climits>
+#include <cmath>
+#include <cstdio>
+#include <new>
+#include <tuple>
+
+#include <Windows.h>
 #include <initguid.h>
-#include <assert.h>
 #include <commctrl.h> // for InitCommonControls() 
 #include <shellapi.h> // for ExtractIcon()
-#include <new.h>      // for placement new
 #include <shlobj.h>
-#include <math.h>
-#include <limits.h>
-#include <stdio.h>
 
 // CRT's memory leak detection
 #if defined(DEBUG) || defined(_DEBUG)
@@ -102,10 +104,10 @@
 
 #if defined(DEBUG) || defined(_DEBUG)
 #ifndef V
-#define V(x)           { hr = (x); if( FAILED(hr) ) { DXUTTrace( __FILE__, (DWORD)__LINE__, hr, L#x, true ); } }
+#define V(x)           { hr = (x); if( FAILED(hr) ) { DXUTTrace( __FILE__, (DWORD)__LINE__, hr, L## #x, true ); } }
 #endif
 #ifndef V_RETURN
-#define V_RETURN(x)    { hr = (x); if( FAILED(hr) ) { return DXUTTrace( __FILE__, (DWORD)__LINE__, hr, L#x, true ); } }
+#define V_RETURN(x)    { hr = (x); if( FAILED(hr) ) { return DXUTTrace( __FILE__, (DWORD)__LINE__, hr, L## #x, true ); } }
 #endif
 #else
 #ifndef V
@@ -131,7 +133,7 @@
     ((DWORD)((((a)&0xff)<<24)|(((r)&0xff)<<16)|(((g)&0xff)<<8)|((b)&0xff)))
 #endif
 
-#define DXUT_VERSION 1122
+#define DXUT_VERSION 1129
 
 //--------------------------------------------------------------------------------------
 // Structs

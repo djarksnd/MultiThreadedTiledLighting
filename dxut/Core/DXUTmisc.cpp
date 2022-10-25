@@ -3,13 +3,17 @@
 //
 // Shortcut macros and functions for using DX objects
 //
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=320437
 //--------------------------------------------------------------------------------------
-#include "dxut.h"
+#include "DXUT.h"
 #include <xinput.h>
+
+#ifndef XINPUT_DLL_W
+#define XINPUT_DLL_W L"xinput9_1_0.dll"
+#endif
 
 #include "ScreenGrab.h"
 
@@ -202,7 +206,7 @@ void CDXUTTimer::LimitThreadAffinityToCurrentProc()
 //--------------------------------------------------------------------------------------
 // Returns the string for the given DXGI_FORMAT.
 //--------------------------------------------------------------------------------------
-#define DXUTDXGIFMTSTR( a ) case a: pstr = L#a; break;
+#define DXUTDXGIFMTSTR( a ) case a: pstr = L## #a; break;
 
 _Use_decl_annotations_
 LPCWSTR WINAPI DXUTDXGIFormatToString( DXGI_FORMAT format, bool bWithPrefix )
@@ -552,7 +556,7 @@ HRESULT WINAPI DXUT_Dynamic_D3D11CreateDevice( IDXGIAdapter* pAdapter,
         return DXUTERR_NODIRECT3D;
 }
 
-#define TRACE_ID(iD) case iD: return L#iD;
+#define TRACE_ID(iD) case iD: return L## #iD;
 
 //--------------------------------------------------------------------------------------
 const WCHAR* WINAPI DXUTTraceWindowsMessage( _In_ UINT uMsg )
@@ -938,7 +942,7 @@ HRESULT DXUTGetGamepadState( DWORD dwPort, DXUT_GAMEPAD* pGamePad, bool bThumbst
     static LPXINPUTGETCAPABILITIES s_pXInputGetCapabilities = nullptr;
     if( !s_pXInputGetState || !s_pXInputGetCapabilities )
     {
-        HINSTANCE hInst = LoadLibraryEx( XINPUT_DLL, nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
+        HINSTANCE hInst = LoadLibraryExW( XINPUT_DLL_W, nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
         if( hInst )
         {
             s_pXInputGetState = reinterpret_cast<LPXINPUTGETSTATE>( reinterpret_cast<void*>( GetProcAddress( hInst, "XInputGetState" ) ) );
@@ -1045,7 +1049,7 @@ void DXUTEnableXInput( _In_ bool bEnable )
     static LPXINPUTENABLE s_pXInputEnable = nullptr;
     if( !s_pXInputEnable )
     {
-        HINSTANCE hInst = LoadLibraryEx( XINPUT_DLL, nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
+        HINSTANCE hInst = LoadLibraryExW( XINPUT_DLL_W, nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
         if( hInst )
             s_pXInputEnable = reinterpret_cast<LPXINPUTENABLE>( reinterpret_cast<void*>( GetProcAddress( hInst, "XInputEnable" ) ) );
     }
@@ -1064,7 +1068,7 @@ HRESULT DXUTStopRumbleOnAllControllers()
     static LPXINPUTSETSTATE s_pXInputSetState = nullptr;
     if( !s_pXInputSetState )
     {
-        HINSTANCE hInst = LoadLibraryEx( XINPUT_DLL, nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
+        HINSTANCE hInst = LoadLibraryExW( XINPUT_DLL_W, nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
         if( hInst )
             s_pXInputSetState = reinterpret_cast<LPXINPUTSETSTATE>( reinterpret_cast<void*>( GetProcAddress( hInst, "XInputSetState" ) ) );
     }
@@ -1246,7 +1250,7 @@ HRESULT DXUTSnapD3D11Screenshot( _In_z_ LPCWSTR szFileName, _In_ bool usedds )
     if (!pSwap)
         return E_FAIL;
     
-    ID3D11Texture2D* pBackBuffer;
+    ID3D11Texture2D* pBackBuffer = nullptr;
     HRESULT hr = pSwap->GetBuffer( 0, __uuidof( *pBackBuffer ), ( LPVOID* )&pBackBuffer );
     if (hr != S_OK)
         return hr;
