@@ -61,5 +61,7 @@ DirectX11의 [DeferredContext](https://docs.microsoft.com/en-us/windows/win32/di
 -   빌드과정 없이 포트폴리오를 실행하려면 아래 링크된 파일을 내려받으시면 됩니다.
     -   릴리즈된 바이너리는 Windows 64bit 전용 입니다.
     -   내려받은 파일의 압축을 푼 후 bin폴더의 TiledLighting_x64_release.exe를 실행하세요.
+        -   카메라 이동은 a, s, d, w 키를 사용하세요.
+        -   카메라 회전은 마우스 좌버튼을 누른 채 마우스를 회전하세요.
     -   MultiThreadedTiledLighting.zip
         -   [https://github.com/djarksnd/MultiThreadedTiledLighting/releases/download/1.0/MultiThreadedTiledLighting.zip](https://github.com/djarksnd/MultiThreadedTiledLighting/releases/download/1.0/MultiThreadedTiledLighting.zip)
