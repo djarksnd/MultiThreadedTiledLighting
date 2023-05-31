@@ -101,7 +101,7 @@ float CalcViewDepth(in float sceneDepth, in matrix invProjectionMatrix)
 	return 1.f / (sceneDepth * invProjectionMatrix._34 + invProjectionMatrix._44);
 }
 
-float4 InCodeNormalGlossiness(in const float3 normal, in const float glossiness)
+float4 EncodeNormalGlossiness(in const float3 normal, in const float glossiness)
 {
 	// NormalGlossinessBuffer Format [R10G10B10A2_UNORM]
 	// NormalGlossinessBuffer.RG = Normal.XY;

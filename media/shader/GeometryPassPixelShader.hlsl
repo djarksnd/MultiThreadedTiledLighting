@@ -41,7 +41,7 @@ PS_OUTPUT main(PS_INPUT input)
 
 	Output.sceneColor = diffuse.rgb * 0.01f; // ambient light
 	Output.diffuseSpecular = float4(diffuse.rgb, specularIntensity);
-	Output.normalGlossiness = InCodeNormalGlossiness(normal, glossiness);
+	Output.normalGlossiness = EncodeNormalGlossiness(normal, glossiness);
 	return Output;
 }
 
